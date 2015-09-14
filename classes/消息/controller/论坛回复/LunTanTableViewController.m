@@ -74,7 +74,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-     LuntanTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"dayangcell"];
+    LuntanTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"dayangcell"];
     FriendModel * model = _dataArr[indexPath.row];
     cell.messageLabel.text = model.messageText;
     cell.pinglunLabel.text = model.discussesText;

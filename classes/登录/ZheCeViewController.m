@@ -27,6 +27,10 @@
     NSString* _VerifyCode;
 }
 
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"ZhuceViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -37,10 +41,17 @@
     _phoneNum.delegate = self;
     _mimaAgain.delegate = self;
     _yanzhengma.delegate = self;
+    
+    _name.returnKeyType = UIReturnKeyDone;
+    _mima.returnKeyType = UIReturnKeyDone;
+    _phoneNum.returnKeyType = UIReturnKeyDone;
+    _mimaAgain.returnKeyType = UIReturnKeyDone;
+    _yanzhengma.returnKeyType = UIReturnKeyDone;
+    
+    _mima.secureTextEntry = YES;
+    _mimaAgain.secureTextEntry = YES;
     //_huoqueButton验证码的获取，时间倒计时
     [_huoqueButton addTarget:self action:@selector(Jishi) forControlEvents:UIControlEventTouchUpInside];
-    
-    
     
     _areaArray = [NSMutableArray array];
     
@@ -63,14 +74,58 @@
          }
          
      }];
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyBoardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+}
+
+#pragma mark - 键盘处理
+#pragma mark 键盘即将显示
+- (void)keyBoardWillShow:(NSNotification *)note{
+    if (_yanzhengma.editing == YES) {
+        CGRect rect = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+        CGFloat ty = - rect.size.height + 130;
+        [UIView animateWithDuration:[note.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue] animations:^{
+            self.view.transform = CGAffineTransformMakeTranslation(0, ty);
+        }];
+    }
+    
+}
+
+#pragma mark 键盘即将退出
+- (void)keyBoardWillHide:(NSNotification *)note{
+    
+    [UIView animateWithDuration:[note.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue] animations:^{
+        self.view.transform = CGAffineTransformIdentity;
+    }];
+}
+- (void)textFieldDidBeginEditing:(UITextField *)textField{
+    if (textField == _yanzhengma||textField == _mimaAgain) {
+        CGFloat ty = - 100;
+        [UIView animateWithDuration:0.25 animations:^{
+            self.view.transform = CGAffineTransformMakeTranslation(0, ty);
+        }];
+    }else{
+        [UIView animateWithDuration:0.25 animations:^{
+            self.view.transform = CGAffineTransformIdentity;
+        }];
+    }
+    
+}
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"ZhuceViewController"];
+    
+    [_name resignFirstResponder];
+    [_mima resignFirstResponder];
+    [_mimaAgain resignFirstResponder];
+    [_yanzhengma resignFirstResponder];
 }
 
 #pragma mark -- 获取验证码
 -(void)Jishi{
-    t = 60;
-   _myTimer= [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(action) userInfo:nil repeats:YES];
-    
-    
     int compareResult = 0;
     for (int i = 0; i< _areaArray.count; i++)
     {
@@ -84,8 +139,8 @@
             if (!isMatch)
             {
                 //手机号码不正确
-                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"notice", nil)
-                                                                message:NSLocalizedString(@"errorphonenumber", nil)
+                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"注意", nil)
+                                                                message:NSLocalizedString(@"手机号码格式不正确", nil)
                                                                delegate:self
                                                       cancelButtonTitle:NSLocalizedString(@"sure", nil)
                                                       otherButtonTitles:nil, nil];
@@ -101,8 +156,8 @@
         if (_phoneNum.text.length != 11)
         {
             //手机号码不正确
-            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"notice", nil)
-                                                            message:NSLocalizedString(@"errorphonenumber", nil)
+            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"注意", nil)
+                                                            message:NSLocalizedString(@"手机号码格式不正确", nil)
                                                            delegate:self
                                                   cancelButtonTitle:NSLocalizedString(@"sure", nil)
                                                   otherButtonTitles:nil, nil];
@@ -111,7 +166,7 @@
         }
     }
     
-    NSString * str = [NSString stringWithFormat:@"%@:%@ %@",NSLocalizedString(@"即将验证", nil),@"+86",_phoneNum.text];
+    NSString * str = [NSString stringWithFormat:@"%@:%@ %@\n验证码5分钟内有效",NSLocalizedString(@"即将验证", nil),@"+86",_phoneNum.text];
     _str = [NSString stringWithFormat:@"%@",_phoneNum.text];
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"验证手机号", nil)
                                                     message:str delegate:self
@@ -121,36 +176,47 @@
 }
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (1 == buttonIndex)
-    {
-        //VerifyViewController* verify = [[VerifyViewController alloc] init];
-        NSString* str2 = [@"+86" stringByReplacingOccurrencesOfString:@"+" withString:@""];
-        //[verify setPhone:self.telField.text AndAreaCode:str2];
-        
-        [SMS_SDK getVerificationCodeBySMSWithPhone:_phoneNum.text
-                                              zone:str2
-                                            result:^(SMS_SDKError *error)
-         {
-             if (!error)
+    if (alertView.tag == 1) {
+        [self.navigationController popViewControllerAnimated:YES];
+    }else{
+        if (1 == buttonIndex)
+        {
+            
+            //VerifyViewController* verify = [[VerifyViewController alloc] init];
+            NSString* str2 = [@"+86" stringByReplacingOccurrencesOfString:@"+" withString:@""];
+            //[verify setPhone:self.telField.text AndAreaCode:str2];
+            
+            [SMS_SDK getVerificationCodeBySMSWithPhone:_phoneNum.text
+                                                  zone:str2
+                                                result:^(SMS_SDKError *error)
              {
-                 NSLog(@"验证码发送成功");
-                 /*[self presentViewController:verify animated:YES completion:^{
-                     ;
-                 }];*/
-             }
-             else
-             {
-                 UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"codesenderrtitle", nil)
-                                                                 message:[NSString stringWithFormat:@"状态码：%zi ,错误描述：%@",error.errorCode,error.errorDescription]
-                                                                delegate:self
-                                                       cancelButtonTitle:NSLocalizedString(@"sure", nil)
-                                                       otherButtonTitles:nil, nil];
-                 [alert show];
-             }
-             
-         }];
-        
-        //        customIdentifier: 自定义模板标识 如果要使用自定义模板标识需要在官网http://www.mob.com进行申请，审核通过以后会下发该标识，没有情况下默认传@""
+                 if (!error)
+                 {
+                     NSLog(@"验证码发送成功");
+                  
+                     /*_myTimer = nil;
+                     t = 60;
+                     _myTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(action) userInfo:nil repeats:YES];*/
+                     //
+                   
+                 }
+                 else
+                 {
+                     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"提示"
+                                                                     message:@"验证码发送失败，请稍候再试！"
+                                                                    delegate:self
+                                                           cancelButtonTitle:@"我知道了"
+                                                           otherButtonTitles:nil, nil];
+                     [alert show];
+                 }
+                 
+             }];
+            
+
+    
+    }
+    
+            //        customIdentifier: 自定义模板标识 如果要使用自定义模板标识需要在官网http://www.mob.com进行申请，审核通过以后会下发该标识，没有情况下默认传@""
         //        [SMS_SDK getVerificationCodeBySMSWithPhone:self.telField.text zone:str2 customIdentifier:@"FXsq" result:^(SMS_SDKError *error) {
         //            if (!error)
         //            {
@@ -175,24 +241,24 @@
 
 
 - (void)action{
-     t --;
+    t --;
+    _huoqueButton.titleLabel.text = [NSString stringWithFormat:@"%lds",(long)t];
     [_huoqueButton setTitle:[NSString stringWithFormat:@"%lds",(long)t] forState:UIControlStateNormal];
-   
+    //[_huoqueButton setTitle:[NSString stringWithFormat:@"%lds",(long)t] forState:UIControlStateSelected];
+    //_huoqueButton.selected = YES;
+    _huoqueButton.userInteractionEnabled = NO;
+    
     if (t <=0) {
         
         if ([_myTimer isValid]) {
             [_myTimer invalidate];
         }
-            [_huoqueButton setTitle:@"重发验证码" forState:UIControlStateNormal];
-            _huoqueButton.enabled=YES;
-            [_huoqueButton addTarget:self action:@selector(Chongfa) forControlEvents:UIControlEventTouchUpInside];
-        
-        
-    
+        [_huoqueButton setTitle:@"重发验证码" forState:UIControlStateNormal];
+        [_huoqueButton addTarget:self action:@selector(Chongfa) forControlEvents:UIControlEventTouchUpInside];
+        _huoqueButton.userInteractionEnabled = YES;
     }
-
-}
--(void)Chongfa{
+    
+}-(void)Chongfa{
    // [_huoqueButton setTitle:@"重发验证码" forState:UIControlStateNormal];
 
 }
@@ -296,9 +362,10 @@
            NSLog(@"state = %i,验证通过",state);
             if (_phoneNum.text.length>0&&_name.text.length>0&&_mima.text.length>0&&_yanzhengma.text.length>0&&[_mima.text isEqualToString:_mimaAgain.text]) {
                 NSString*urlString=[NSString stringWithFormat:@"%@user/register?mobile=%@&nickname=%@&password=%@&vcode=%@",ApiUrlHead,_phoneNum.text,_name.text,_mima.text,_yanzhengma.text];
+                     NSString *encoded = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
                 NSLog(@"urlString = %@",urlString);
                 AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-                [manager GET:urlString parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                [manager GET:encoded parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
                     NSLog(@"JSON: %@", responseObject);
                     NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
                     if ([code isEqualToString:@"0"]) {
@@ -328,20 +395,22 @@
                             NSLog(@"JSON: %@", responseObject);
                             NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
                             if ([code isEqualToString:@"0"]) {
+                                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:nil message:@"恭喜！注册成功" delegate:self cancelButtonTitle:@"去登录" otherButtonTitles: nil];
+                                alert.tag = 1;
                                 [self dismissModalViewControllerAnimated:YES];
                                 
+                            }else{
+                                NSString *error = [responseObject objectForKey:@"err"];
                                 
-                                
+                                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:error delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                                [alert show];
+                                NSLog(@"error = %@",error);
                             }
-                            
-                            
                             
                         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                             NSLog(@"Error: %@", error);
-                            
-                            
-                        }];
                         
+                        }];
                         
                         
                     }else{
@@ -350,11 +419,7 @@
                         UIAlertView*alert=[[UIAlertView alloc]initWithTitle:@"温馨提示" message:[NSString stringWithFormat:@"%@",error] delegate:self cancelButtonTitle:@"确定" otherButtonTitles:@"取消", nil];
                         [alert show];
                         
-                        
-                        
                     }
-                    
-                    
                     
                 } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                     NSLog(@"Error: %@", error);
@@ -375,7 +440,6 @@
     }];
     
 }
-
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     [textField resignFirstResponder];
     return YES;

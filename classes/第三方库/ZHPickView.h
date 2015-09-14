@@ -12,14 +12,19 @@
 @protocol ZHPickViewDelegate <NSObject>
 
 @optional
--(void)toobarDonBtnHaveClick:(ZHPickView *)pickView resultString:(NSString *)resultString;
+-(void)toobarDonBtnHaveClick:(ZHPickView *)pickView resultID:(NSString *)resultID resultString:(NSString *)resultString;
 
 @end
 
 @interface ZHPickView : UIView
 
 @property(nonatomic,weak) id<ZHPickViewDelegate> delegate;
-
+@property(nonatomic,strong)NSMutableArray *firstCom;
+@property(nonatomic,strong)NSMutableArray *secondCom;
+@property(nonatomic,strong)NSMutableArray *secondComID;
+@property(nonatomic,strong)NSMutableDictionary *secondDic;
+@property(nonatomic,strong)NSString *shengString;
+@property(nonatomic,strong)NSString *shiString;
 /**
  *  通过plistName添加一个pickView
  *

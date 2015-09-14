@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface GerenInfoViewController : UIViewController
-
+@property (nonatomic ,strong)NSString  *token;
+@property (nonatomic ,strong)NSString *uid;
 @end

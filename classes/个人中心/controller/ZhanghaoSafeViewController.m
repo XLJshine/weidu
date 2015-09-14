@@ -16,6 +16,8 @@
 #import "YouxiangBangdingViewController.h"
 #import "PhoneBangdingViewController.h"
 #import "MimaChangeViewController.h"
+
+#import "ZhanghaoBandingViewController.h"
 @interface ZhanghaoSafeViewController ()<UITableViewDataSource,UITableViewDelegate>
 @property (nonatomic ,strong)UITableView *tableview;
 @property (nonatomic ,strong)NSArray *titleArray;
@@ -45,8 +47,16 @@
 - (void)backAction{
     [self.navigationController popViewControllerAnimated:YES];
 }
+
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"ZhanghaoSafeViewController"];
+}
+
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"ZhanghaoSafeViewController"];
     NSString *urlStr = [NSString stringWithFormat:@"%@account/info?access-token=%@",ApiUrlHead,_token];
     manager = [AFHTTPRequestOperationManager manager];
     [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
@@ -55,9 +65,11 @@
         if ([code isEqualToString:@"0"]) {
             Data = [responseObject objectForKey:@"data"];
             [_detailArray removeAllObjects];
-            NSString *username = [Data objectForKey:@"username"];
+            
+           
+            NSString *username = [NSString stringWithFormat:@"%@",[Data objectForKey:@"username"]];
             NSString *mobile = [NSString stringWithFormat:@"%@",[Data objectForKey:@"mobile"]];
-            NSString *email = [Data objectForKey:@"email"];
+            NSString *email = [NSString stringWithFormat:@"%@",[ Data objectForKey:@"email"]];
             [_detailArray addObject:username];
             [_detailArray addObject:mobile];
             [_detailArray addObject:email];
@@ -91,7 +103,7 @@
     _tableview.scrollEnabled = NO;
     [self.view addSubview:_tableview];
     
-    
+    NSLog(@"_token = %@",_token);
    
     UIView *headview = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 10)];
     headview.backgroundColor = [UIColor clearColor];
@@ -170,6 +182,7 @@
             phone.token = _token;
             phone.uid = _uid;
             phone.phoneNum = [NSString stringWithFormat:@"%@",mobile];
+            NSLog(@"===================%@",phone.phoneNum);
             [self.navigationController pushViewController:phone animated:YES];
         }else{
             PhoneBangdingViewController*pbd=[[PhoneBangdingViewController alloc]init];
@@ -180,18 +193,28 @@
         }
       
     }else if (indexPath.row==2){
-        NSString *email = [Data objectForKey:@"email"];
+        NSString *email = [NSString stringWithFormat:@"%@",[ Data objectForKey:@"email"]];
         if (email.length > 0) {
             YouXiangViewController*YOUXIANG=[[YouXiangViewController alloc]init];
             YOUXIANG.token = _token;
             YOUXIANG.uid = _uid;
             YOUXIANG.youxiangNum = [_detailArray objectAtIndex:indexPath.row];
+            NSLog(@"YOUXIANG.youxiangNum===============%@",YOUXIANG.youxiangNum);
             [self.navigationController pushViewController:YOUXIANG animated:YES];
         }else{
             YouxiangBangdingViewController*yxBangding=[[YouxiangBangdingViewController alloc]init];
             yxBangding.token = _token;
             yxBangding.uid = _uid;
             [self.navigationController pushViewController:yxBangding animated:YES];
+        }
+    }else if (indexPath.row==0){
+        NSString*zhanghao=[NSString stringWithFormat:@"%@",[Data objectForKey:@"username"]];
+        if ([zhanghao isEqualToString:@"(null)"]||[zhanghao isEqualToString:@""]) {
+            ZhanghaoBandingViewController*ZHVC=[[ZhanghaoBandingViewController alloc]init];
+            ZHVC.token=_token;
+            NSLog(@"_token = %@",_token);
+            ZHVC.uid=_uid;
+            [self.navigationController pushViewController:ZHVC animated:YES];
         }
     }
 }

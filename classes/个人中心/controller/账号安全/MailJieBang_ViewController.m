@@ -20,6 +20,10 @@
 
 }
 
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"MailJieBangViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
@@ -58,6 +62,13 @@
         [alert show];
         
     }
+}
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+      [MobClick endLogPageView:@"MailJieBangViewController"];
+    //通知刷新我的个人中心
+    [[NSNotificationCenter defaultCenter]postNotificationName:@"reloadMyInfo" object:nil userInfo:nil];
+    
 }
 - (void)action{
     t --;

@@ -14,4 +14,8 @@
 @property (weak, nonatomic) IBOutlet UILabel *phoneNumLable;
 - (IBAction)exchangNum:(id)sender;
 @property (nonatomic ,strong)NSString *phoneNum;
+@property (weak, nonatomic) IBOutlet UIButton *jieBangPhoneBtn;
+- (IBAction)jieBangPhoneBtn:(id)sender;
+- (IBAction)jjieChuBangDingShouJIHao:(id)sender;
+
 @end

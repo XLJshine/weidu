@@ -10,6 +10,7 @@
 #import "Message.h"
 #import "MessageFrame.h"
 #import "TimeButton.h"
+#import "UIImageView+MJWebCache.h"
 @interface MessageCell ()
 {
     TimeButton     *_timeBtn;
@@ -65,7 +66,8 @@
     _timeBtn.frame = _messageFrame.timeF;
     
     // 2、设置头像
-    _iconView.image = [UIImage imageNamed:message.icon];
+    //_iconView.image = [UIImage imageNamed:message.icon];
+    [_iconView setImageURLStr:message.icon placeholder:placeImage];
     _iconView.layer.masksToBounds = YES;
     _iconView.layer.cornerRadius = 4;
     _iconView.frame = _messageFrame.iconF;
@@ -82,16 +84,34 @@
     UIImage *normal , *focused;
     if (message.type == MessageTypeMe) {
     
+        //normal = [UIImage imageNamed:@"chatto_bg_normal.png"];
+        //normal = [normal stretchableImageWithLeftCapWidth:normal.size.width * 0.5 topCapHeight:normal.size.height * 0.7];
+        
+        CGFloat top = 26.5; // 顶端盖高度
+        CGFloat bottom = 2.5; // 底端盖高度
+        CGFloat left = 20; // 左端盖宽度
+        CGFloat right = 20; // 右端盖宽度
+        UIEdgeInsets insets = UIEdgeInsetsMake(top, left, bottom, right);
+        // 伸缩后重新赋值
         normal = [UIImage imageNamed:@"chatto_bg_normal.png"];
-        normal = [normal stretchableImageWithLeftCapWidth:normal.size.width * 0.5 topCapHeight:normal.size.height * 0.7];
+        normal = [normal resizableImageWithCapInsets:insets];
+       
         //focused = [UIImage imageNamed:@"chatto_bg_focused.png"];
         //focused = [focused stretchableImageWithLeftCapWidth:focused.size.width * 0.5 topCapHeight:focused.size.height * 0.7];
     }else{
         
-        normal = [UIImage imageNamed:@"chatfrom_bg_normal.png"];
-        normal = [normal stretchableImageWithLeftCapWidth:normal.size.width * 0.5 topCapHeight:normal.size.height * 0.7];
+        //normal = [UIImage imageNamed:@"chatfrom_bg_normal.png"];
+        //normal = [normal stretchableImageWithLeftCapWidth:normal.size.width * 0.5 topCapHeight:normal.size.height * 0.7];
         //focused = [UIImage imageNamed:@"chatfrom_bg_focused.png"];
         //focused = [focused stretchableImageWithLeftCapWidth:focused.size.width * 0.5 topCapHeight:focused.size.height * 0.7];
+        CGFloat top = 26.5; // 顶端盖高度
+        CGFloat bottom = 2.5; // 底端盖高度
+        CGFloat left = 20; // 左端盖宽度
+        CGFloat right = 20; // 右端盖宽度
+        UIEdgeInsets insets = UIEdgeInsetsMake(top, left, bottom, right);
+        // 伸缩后重新赋值
+        normal = [UIImage imageNamed:@"chatfrom_bg_normal.png"];
+        normal = [normal resizableImageWithCapInsets:insets];
         
     }
     [_contentBtn setBackgroundImage:normal forState:UIControlStateNormal];

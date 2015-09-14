@@ -8,6 +8,7 @@
 
 #import "PhoneBangdingViewController.h"
 #import <SMS_SDK/SMS_SDK.h>
+#import "WBBooksManager.h"
 @interface PhoneBangdingViewController ()
 
 @end
@@ -43,39 +44,122 @@
     return self;
 }
 
-
-- (void)action{
-    t --;
-    [_PhoneHuoquButton setTitle:[NSString stringWithFormat:@"%lds",(long)t] forState:UIControlStateNormal];
-    
-    if (t <=0) {
-        
-        if ([_myTimer isValid]) {
-            [_myTimer invalidate];
-        }
-        [_PhoneHuoquButton setTitle:@"重发验证码" forState:UIControlStateNormal];
-        _PhoneHuoquButton.enabled=YES;
-        [_PhoneHuoquButton addTarget:self action:@selector(Chongfa) forControlEvents:UIControlEventTouchUpInside];
-        
-        
-        
-    }
-    
-}
--(void)Chongfa{
-    // [_huoqueButton setTitle:@"重发验证码" forState:UIControlStateNormal];
-    
-}
+//发送短信验证码的时候，要他倒计时
+//- (void)action{
+//    t --;
+//    [_PhoneHuoquButton setTitle:[NSString stringWithFormat:@"%lds",(long)t] forState:UIControlStateNormal];
+//    
+//    if (t <=0) {
+//        
+//        if ([_myTimer isValid]) {
+//            [_myTimer invalidate];
+//        }
+//        [_PhoneHuoquButton setTitle:@"重发验证码" forState:UIControlStateNormal];
+//        _PhoneHuoquButton.enabled=YES;
+//        [_PhoneHuoquButton addTarget:self action:@selector(Chongfa) forControlEvents:UIControlEventTouchUpInside];
+//        
+//        
+//        
+//    }
+//    
+//}
+//-(void)Chongfa{
+//    // [_huoqueButton setTitle:@"重发验证码" forState:UIControlStateNormal];
+//    
+//}
 
 - (void)backAction{
     [self.navigationController popViewControllerAnimated:YES];
 }
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PhoneBangdingViewController"];
+}
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PhoneBangdingViewController"];
+    
+    //通知刷新我的个人中心
+    [[NSNotificationCenter defaultCenter]postNotificationName:@"reloadMyInfo" object:nil userInfo:nil];
+    
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
+    NSLog(@"_token = %@",_token);
+    //判断是否显示密码输入框
+    NSString*urlString=[NSString stringWithFormat:@"%@account/is-set-pwd?access-token=%@",ApiUrlHead,_token];
+    NSLog(@"urlString = %@",urlString);
+    manager = [AFHTTPRequestOperationManager manager];
+    [manager GET:urlString parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@", responseObject);
+        NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"data"]];
+        if ([code isEqualToString:@"1"]) {
+            //设置过密码了
+            _bangDingButton.frame = CGRectMake(10, 176, self.view.bounds.size.width - 20, 40);
+            
+            _ruguoBangDingLable.frame=CGRectMake(10, 99, self.view.bounds.size.width - 20, 44);
+            _shuruBeiJIngTu.hidden = YES;
+            _shuRuMimaText.hidden = YES;
+            _zaiCiShuRuBeijingTu.hidden = YES;
+            _zaiCiShuRuMIMAText.hidden = YES;
+
+            
+            
+        }else{
+        //未设置密码
+        
+            _shuruBeiJIngTu.hidden = NO;
+            _shuRuMimaText.hidden = NO;
+            _zaiCiShuRuBeijingTu.hidden = NO;
+            _zaiCiShuRuMIMAText.hidden = NO;
+            
+            
+            _shuRuMimaText.frame=CGRectMake(13, 104, 297, 35);
+            _shuruBeiJIngTu.frame=CGRectMake(10, 104, 300, 35);
+            _zaiCiShuRuMIMAText.frame=CGRectMake(13, 151, 297, 35);
+            _zaiCiShuRuBeijingTu.frame=CGRectMake(10, 151, 300, 35);
+            _bangDingButton.frame = CGRectMake(10, 264, self.view.bounds.size.width - 20, 40);
+            _ruguoBangDingLable.frame=CGRectMake(10, 195,  self.view.bounds.size.width - 20, 44);
+            
+            _shuRuMimaText.delegate=self;
+            _zaiCiShuRuMIMAText.delegate=self;
+            
+//            //设置密码
+//            NSString*URLString=[NSString stringWithFormat:@"%@user/login?account=%@&password=%@",ApiUrlHead,,_mima.text];
+//            NSLog(@"urlString = %@",urlString);
+//            AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+//            [manager GET:URLString parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//                NSLog(@"JSON: %@", responseObject);
+//                NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+//                if ([code isEqualToString:@"0"]) {
+//                    [self dismissModalViewControllerAnimated:YES];
+//                    
+//                }
+//                
+//            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//                NSLog(@"Error: %@", error);
+//                
+//            }];
+//            
+
+            
+        
+        }
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error: %@", error);
+        
+    }];
+    
+    
     
     
     _PhoneNumTextFiled.delegate=self;
     _PhoneYanZhengMa.delegate=self;
+    
+   
+    
     
     
     //_huoqueButton验证码的获取，时间倒计时
@@ -106,13 +190,37 @@
 - (IBAction)PhoneBandingButton:(id)sender {
     NSLog(@"确定绑定");
     NSString *phoneNum1 =[_PhoneNumTextFiled.text substringToIndex:2];
-    if ([self checkTel:_PhoneNumTextFiled.text]||[phoneNum1 isEqualToString:@"14"]||[phoneNum1 isEqualToString:@"17"]||[phoneNum1 isEqualToString:@"18"]) {
+    if (_PhoneYanZhengMa.text.length == 0) {
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"请输入验证码" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alert show];
+    }else if(![_shuRuMimaText.text isEqualToString:_zaiCiShuRuMIMAText.text]&&_shuRuMimaText.hidden == NO){
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"密码重复不一致" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alert show];
+        
+    }else if (_PhoneNumTextFiled.text.length > 0&&_shuRuMimaText.text.length == 0&&_zaiCiShuRuMIMAText.hidden == NO){
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"请输入密码" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alert show];
+        
+        
+    }else if (_PhoneNumTextFiled.text.length == 0&&_shuRuMimaText.text.length > 0&&_zaiCiShuRuMIMAText.hidden == NO){
+        
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"请输入账号" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alert show];
+        
+        
+    }else if(!([self checkTel:_PhoneNumTextFiled.text]||[phoneNum1 isEqualToString:@"14"]||[phoneNum1 isEqualToString:@"17"]||[phoneNum1 isEqualToString:@"18"])){
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"手机号格式不正确" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        [alert show];
+    }else if (([self checkTel:_PhoneNumTextFiled.text]||[phoneNum1 isEqualToString:@"14"]||[phoneNum1 isEqualToString:@"17"]||[phoneNum1 isEqualToString:@"18"])&&_shuRuMimaText.text.length > 0&&[_shuRuMimaText.text isEqualToString:_zaiCiShuRuMIMAText.text]) {
         _VerifyCode = _PhoneYanZhengMa.text;
         [SMS_SDK commitVerifyCode:_VerifyCode result:^(enum SMS_ResponseState state) {
             if (state == 1) {
                 NSLog(@"state = %i,验证通过",state);
+                //判断设置的密码是否一致
+                if ([_shuRuMimaText.text isEqualToString:_zaiCiShuRuMIMAText.text]) {
+                    
                 if (_PhoneYanZhengMa.text.length > 0) {
-                    NSString *urlStr = [NSString stringWithFormat:@"%@account/bind-mobile?mobile=%@&access-token=%@",ApiUrlHead,_PhoneNumTextFiled.text,_token];
+                    NSString *urlStr = [NSString stringWithFormat:@"%@account/bind-mobile?mobile=%@&password=%@&access-token=%@",ApiUrlHead,_PhoneNumTextFiled.text,_shuRuMimaText.text,_token];
                     manager = [AFHTTPRequestOperationManager manager];
                     [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
                         NSLog(@"JSON: %@", responseObject);
@@ -120,31 +228,94 @@
                         if ([code isEqualToString:@"0"]) {
                             NSDictionary * Data = [responseObject objectForKey:@"data"];
                             NSLog(@"Data = %@",Data);
+                            
                             UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"手机号绑定成功" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
                             [alert show];
+                            //通知刷新我的个人中心
+                            [[NSNotificationCenter defaultCenter]postNotificationName:@"reloadMyInfo" object:nil userInfo:nil];
                         }else if (![code isEqualToString:@"0"]){
                             NSString *error = [responseObject objectForKey:@"err"];
                             NSLog(@"error = %@",error);
+                            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:error  delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                            [alert show];
                         }
                     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                         NSLog(@"Error: %@", error);
-                        
+                        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"网络超时或者未知错误"  delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                        [alert show];
                         
                     }];
+                }
+                }else{
+                    UIAlertView*A=[[UIAlertView alloc]initWithTitle:@"温馨提示" message:@"密码不一致" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                    [A show];
+                    
+                    
+                }
+            }else{
+                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"验证码错误或失效，请重新获取验证码" delegate:nil cancelButtonTitle:@"我知道了" otherButtonTitles:nil];
+                [alert show];
+            }
+            }];
+       
+        
+    }else if(([self checkTel:_PhoneNumTextFiled.text]||[phoneNum1 isEqualToString:@"14"]||[phoneNum1 isEqualToString:@"17"]||[phoneNum1 isEqualToString:@"18"])&&_shuRuMimaText.text.length == 0&&[_shuRuMimaText.text isEqualToString:_zaiCiShuRuMIMAText.text]){
+        _VerifyCode = _PhoneYanZhengMa.text;
+        [SMS_SDK commitVerifyCode:_VerifyCode result:^(enum SMS_ResponseState state) {
+            if (state == 1) {
+                NSLog(@"state = %i,验证通过",state);
+                //判断设置的密码是否一致
+                if ([_shuRuMimaText.text isEqualToString:_zaiCiShuRuMIMAText.text]) {
+                    if (_PhoneYanZhengMa.text.length > 0) {
+                        NSString *urlStr = [NSString stringWithFormat:@"%@account/bind-mobile?mobile=%@&access-token=%@",ApiUrlHead,_PhoneNumTextFiled.text,_token];
+                        manager = [AFHTTPRequestOperationManager manager];
+                        [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                            NSLog(@"JSON: %@", responseObject);
+                            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+                            if ([code isEqualToString:@"0"]) {
+                                NSDictionary * Data = [responseObject objectForKey:@"data"];
+                                NSLog(@"Data = %@",Data);
+                                
+                                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"手机号绑定成功" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                                [alert show];
+                                //通知刷新我的个人中心
+                                [[NSNotificationCenter defaultCenter]postNotificationName:@"reloadMyInfo" object:nil userInfo:nil];
+                            }else if (![code isEqualToString:@"0"]){
+                                NSString *error = [responseObject objectForKey:@"err"];
+                                NSLog(@"error = %@",error);
+                                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:error  delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                                [alert show];
+                            }
+                        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                            NSLog(@"Error: %@", error);
+                            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"网络超时或者未知错误"  delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+                            [alert show];
+                            
+                        }];
+                    }
+                }else{
+                    UIAlertView*A=[[UIAlertView alloc]initWithTitle:@"温馨提示" message:@"密码不一致" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+                    [A show];
+                    
+                    
                 }
             }else{
                 UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"验证码错误或失效，请重新获取验证码" delegate:nil cancelButtonTitle:@"我知道了" otherButtonTitles:nil];
                 [alert show];
             }
         }];
-       
         
     }else{
-        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"手机号格式不正确" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"请输入手机号" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
         [alert show];
+        
+        
+        
     }
+         
     
 }
+         
 //手机号码正则表达式
 - (BOOL)checkTel:(NSString *)str
 
@@ -179,8 +350,9 @@
 
 #pragma mark -- 获取验证码
 -(void)Jishi{
-    t = 60;
-    _myTimer= [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(action) userInfo:nil repeats:YES];
+    //发送短信验证码的时候，要他倒计时
+    //t = 60;
+//    _myTimer= [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(action) userInfo:nil repeats:YES];
     
     int compareResult = 0;
     for (int i = 0; i< _areaArray.count; i++)
@@ -195,10 +367,10 @@
             if (!isMatch)
             {
                 //手机号码不正确
-                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"notice", nil)
-                                                                message:NSLocalizedString(@"errorphonenumber", nil)
+                UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"注意", nil)
+                                                                message:NSLocalizedString(@"手机号码格式不正确", nil)
                                                                delegate:self
-                                                      cancelButtonTitle:NSLocalizedString(@"sure", nil)
+                                                      cancelButtonTitle:NSLocalizedString(@"我知道了", nil)
                                                       otherButtonTitles:nil, nil];
                 [alert show];
                 return;
@@ -212,17 +384,18 @@
         if (_PhoneNumTextFiled.text.length != 11)
         {
             //手机号码不正确
-            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"notice", nil)
-                                                            message:NSLocalizedString(@"errorphonenumber", nil)
+            //手机号码不正确
+            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"注意", nil)
+                                                            message:NSLocalizedString(@"手机号码格式不正确", nil)
                                                            delegate:self
-                                                  cancelButtonTitle:NSLocalizedString(@"sure", nil)
+                                                  cancelButtonTitle:NSLocalizedString(@"我知道了", nil)
                                                   otherButtonTitles:nil, nil];
             [alert show];
             return;
         }
     }
     
-    NSString * str = [NSString stringWithFormat:@"%@:%@ %@",NSLocalizedString(@"即将验证", nil),@"+86",_PhoneNumTextFiled.text];
+    NSString * str = [NSString stringWithFormat:@"%@:%@ %@\n验证码5分钟内有效",NSLocalizedString(@"即将验证", nil),@"+86",_PhoneNumTextFiled.text];
     _str = [NSString stringWithFormat:@"%@",_PhoneNumTextFiled.text];
     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"验证手机号", nil)
                                                     message:str delegate:self
@@ -251,11 +424,11 @@
              }
              else
              {
-                 UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"codesenderrtitle", nil)
-                                                                 message:[NSString stringWithFormat:@"状态码：%zi ,错误描述：%@",error.errorCode,error.errorDescription]
-                                                                delegate:self
-                                                       cancelButtonTitle:NSLocalizedString(@"sure", nil)
-                                                       otherButtonTitles:nil, nil];
+                 UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"提示"
+                                                               message:[NSString stringWithFormat:@"验证码发送失败，请稍候再试!"]
+                                                              delegate:self
+                                                     cancelButtonTitle:@"我知道了"
+                                                     otherButtonTitles:nil, nil];
                  [alert show];
              }
              

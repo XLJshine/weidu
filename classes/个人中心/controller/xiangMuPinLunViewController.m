@@ -40,7 +40,15 @@
 - (void)backAction{
     [self.navigationController popViewControllerAnimated:YES];
 }
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"xiangmuPinglunViewController"];
+}
 
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"xiangmuPinglunViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     _myTableView.delegate=self;
@@ -189,10 +197,14 @@
 -(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     XiangMuPingLunTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-
-    cell.nameLable.text=_DataArray[indexPath.row][@"title"];
-    cell.hangYeLable.text=_DataArray[indexPath.row][@"trade"];
-    cell.diQuLable.text=_DataArray[indexPath.row][@"area"];
+    NSString*titleStr=[NSString stringWithFormat:@"%@",_DataArray[indexPath.row][@"title"]];
+    cell.nameLable.text=titleStr;
+    
+    NSString*tradeStr=[NSString stringWithFormat:@"%@",_DataArray[indexPath.row][@"trade"]];
+    cell.hangYeLable.text=tradeStr;
+    
+    NSString*areaStr=[NSString stringWithFormat:@"%@",_DataArray[indexPath.row][@"area"]];
+    cell.diQuLable.text=areaStr;
     return cell;
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{

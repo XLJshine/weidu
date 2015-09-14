@@ -12,5 +12,5 @@
 @property (nonatomic ,strong)NSString  *token;
 @property (nonatomic ,strong)NSString *uid;
 @property (nonatomic ,strong)NSString *ifModelNavigation;
-+ (id)shareInstance;
++ (id)shareInstanceWithToken:(NSString *)token uid:(NSString *)uid;
 @end

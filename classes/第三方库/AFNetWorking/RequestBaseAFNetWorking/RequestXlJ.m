@@ -54,7 +54,6 @@
                 
             }
             
-            
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             NSLog(@"Error: %@", error);
             _block(1,nil,nil,nil);
@@ -107,7 +106,7 @@
     if ([get_or_Post isEqualToString:@"get"]||[get_or_Post isEqualToString:@"GET"]||[get_or_Post isEqualToString:@"Get"]) {
         AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
         [manager GET:urlstr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-            NSLog(@"JSON: %@", responseObject);
+            //NSLog(@"JSON: %@", responseObject);
             NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
             if ([code isEqualToString:@"0"]) {
                 NSDictionary *dic = [responseObject objectForKey:@"data"];

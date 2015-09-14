@@ -120,10 +120,10 @@
                  }
                  else
                  {
-                     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"codesenderrtitle", nil)
-                                                                     message:[NSString stringWithFormat:@"状态码：%zi ,错误描述：%@",error.errorCode,error.errorDescription]
+                     UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"提示"
+                                                                     message:@"验证码发送失败，请稍候再试！"
                                                                     delegate:self
-                                                           cancelButtonTitle:NSLocalizedString(@"sure", nil)
+                                                           cancelButtonTitle:@"我知道了"
                                                            otherButtonTitles:nil, nil];
                      [alert show];
                  }
@@ -139,6 +139,14 @@
         }
     }
   
+}
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"ExchangePhoneNumViewController"];
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"ExchangePhoneNumViewController"];
 }
 - (void)viewDidLoad {
     [super viewDidLoad];

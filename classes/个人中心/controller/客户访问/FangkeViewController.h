@@ -9,5 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface FangkeViewController : UIViewController
+@property (nonatomic ,strong)NSString  *token;
+@property (nonatomic ,strong)NSString *uid;
 
++ (id)shareInstanceWithToken:(NSString *)token uid:(NSString *)uid;
 @end

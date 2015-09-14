@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-
-@interface LoginViewController : UIViewController
-
+#import "EAIntroView.h"
+@interface LoginViewController : UIViewController<EAIntroDelegate>
+@property (nonatomic ,strong)NSString *ifLoginOut;
 @end

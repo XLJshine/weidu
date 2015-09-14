@@ -9,7 +9,7 @@
 #import "ShouCangTableViewCell.h"
 #import "LableXLJ.h"
 #import "ZanButton.h"
-typedef void(^BlockButtonAction)(NSInteger);
+typedef void(^BlockButtonAction)(NSInteger,NSInteger);
 @interface MyShouCangTableViewCell : ShouCangTableViewCell
 @property (nonatomic ,strong)UILabel *title;
 @property (nonatomic ,strong)UILabel *hangye;
@@ -20,9 +20,11 @@ typedef void(^BlockButtonAction)(NSInteger);
 @property (nonatomic ,strong)ZanButton *liulanbtn;
 @property (nonatomic ,strong)ZanButton *pinglunbtn;
 @property (nonatomic ,strong)ZanButton *morebtn;
+@property (nonatomic ,strong)__block UILabel *addOneLable;
 @property (nonatomic ,strong)UIView *  tanChuangView;
 @property (nonatomic ,strong)__block  BlockButtonAction  block;
-- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier  title:(NSString *)title hangye:(NSString *)hangye location:(NSString *)location time:(NSString *)time detail:(NSString *)detail;
-- (void)title:(NSString *)title hangye:(NSString *)hangye location:(NSString *)location time:(NSString *)time detail:(NSString *)detail;
+- (void)hideAddOneLable;
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier  title:(NSString *)title hangye:(NSString *)hangye location:(NSString *)location time:(NSString *)time detail:(NSString *)detail   titleFont:(NSInteger)font1 lableFont:(NSInteger)font2 titleSepFont:(NSInteger)font4;
+- (void)title:(NSString *)title hangye:(NSString *)hangye location:(NSString *)location time:(NSString *)time detail:(NSString *)detail   titleFont:(NSInteger)font1 lableFont:(NSInteger)font2 titleSepFont:(NSInteger)font4;
 - (void)blockButtonAction:(BlockButtonAction)block;
 @end

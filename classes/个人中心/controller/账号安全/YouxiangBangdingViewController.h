@@ -9,6 +9,12 @@
 #import <UIKit/UIKit.h>
 
 @interface YouxiangBangdingViewController : UIViewController<UITextFieldDelegate>
+@property (weak, nonatomic) IBOutlet UIImageView *shuruBeijIngTu;
+@property (weak, nonatomic) IBOutlet UIImageView *zaiCiShuruBeijingTu;
+@property (weak, nonatomic) IBOutlet UITextField *shezhiMimaText;
+@property (weak, nonatomic) IBOutlet UITextField *zaiCiShuruText;
+@property (weak, nonatomic) IBOutlet UILabel *rugouYouXiangLable;
+@property (weak, nonatomic) IBOutlet UIButton *quedingBDbtn;
 @property (weak, nonatomic) IBOutlet UITextField *YouXiangNumTextField;
 @property (weak, nonatomic) IBOutlet UIButton *youXiangHuoQuButton;
 @property (weak, nonatomic) IBOutlet UITextField *yanzhenmaTextFeild;

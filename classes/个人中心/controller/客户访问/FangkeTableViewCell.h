@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface FangkeTableViewCell : UITableViewCell
+
+
 @property (weak, nonatomic) IBOutlet UILabel *TimeLable;
 @property (weak, nonatomic) IBOutlet UIImageView *touXiangImage;
 @property (weak, nonatomic) IBOutlet UILabel *nameLable;

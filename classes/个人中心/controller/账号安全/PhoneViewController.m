@@ -8,6 +8,7 @@
 
 #import "PhoneViewController.h"
 #import "ExchangePhoneNumViewController.h"
+#import "jieChuBangDinShouJiViewController.h"
 @interface PhoneViewController ()
 
 @end
@@ -29,6 +30,14 @@
 }
 - (void)backAction{
     [self.navigationController popViewControllerAnimated:YES];
+}
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"PhoneViewController"];
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"PhoneViewController"];
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -57,5 +66,17 @@
     exchange.token = _token;
     exchange.uid = _uid;
     [self.navigationController pushViewController:exchange animated:YES];
+}
+- (IBAction)jieBangPhoneBtn:(id)sender {
+    
+}
+
+- (IBAction)jjieChuBangDingShouJIHao:(id)sender {
+    jieChuBangDinShouJiViewController*JCSJ=[[jieChuBangDinShouJiViewController alloc]init];
+    JCSJ.phoneNum = _phoneNum;
+    JCSJ.token = _token;
+    JCSJ.uid = _uid;
+    [self.navigationController pushViewController:JCSJ animated:YES];
+    
 }
 @end

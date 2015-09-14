@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface NewPingLunViewController : UIViewController
-
+@property (nonatomic ,strong)NSString  *token;
+@property (nonatomic ,strong)NSString *uid;
 @end

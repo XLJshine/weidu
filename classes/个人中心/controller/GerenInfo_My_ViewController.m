@@ -23,6 +23,11 @@
 #import "PhoneBangdingViewController.h"
 #import "WBBooksManager.h"
 #import "ZHPickView.h"
+
+#import "pickerView222.h"
+#import "WBBooksManager.h"
+
+#import "PhoneViewController.h"
 @interface GerenInfo_My_ViewController ()<UITableViewDataSource,UITableViewDelegate,UIActionSheetDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate,ZHPickViewDelegate>
 {
     NSMutableArray * _proArr;//用来存储地区的数据
@@ -32,9 +37,10 @@
     NSInteger _row;
 
     ZHPickView * _myPickerView;
-    NSDictionary*_dic;//地区字典
+    pickerView222*_myPickerView22;
+    NSArray*_provincedic;//地区字典
     NSDictionary*_dic2;//职务字典
-    NSDictionary*_dic3;//行业字典
+    NSArray  *_arrayTrade3;//行业字典
 }
 @property (nonatomic,strong)GerenInfoTableViewCell*mycell;
 
@@ -44,6 +50,16 @@
 @property (nonatomic ,strong)NSMutableArray *detailTitleArray;
 @property (nonatomic ,strong)NSArray *headTitleArray;
 @property(nonatomic,strong)NSMutableArray*mainArray;
+//地区字典
+@property (strong, nonatomic)NSMutableDictionary *AreaDic;  //初始化数据
+@property(strong,nonatomic)NSDictionary*areaDiction;
+//@property (strong, nonatomic)__block RequestXlJ *request;
+//行业字典
+@property(strong,nonatomic)NSMutableDictionary*TradeDic;
+@property(strong,nonatomic)NSDictionary*TradeDiction;
+//工作字典
+@property(strong,nonatomic)NSMutableDictionary*JobDic;
+@property(strong,nonatomic)NSDictionary*JobDiction;
 @end
 
 @implementation GerenInfo_My_ViewController{
@@ -83,6 +99,24 @@
     }
     return self;
 }
+- (void)viewDidDisappear:(BOOL)animated{
+    [super viewDidDisappear:animated];
+    [_myPickerView removeFromSuperview];
+    [_myPickerView22 removeFromSuperview];
+
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"GerenInfoViewController"];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"GerenInfoViewController"];
+     //通知刷新我的个人中心
+    [[NSNotificationCenter defaultCenter]postNotificationName:@"reloadMyInfo" object:nil userInfo:nil];
+
+}
 -(void)bianJiAction{
     NSLog(@"编辑");
     
@@ -93,7 +127,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     
     
     _proArr=[[NSMutableArray alloc]init];
@@ -108,8 +141,16 @@
     //读取初始化数据
     NSMutableDictionary * resultDictionary = [[NSMutableDictionary alloc] init];
     [[WBBooksManager sharedInstance] readPlist:&resultDictionary];
-    NSDictionary *ArticleDic = [resultDictionary objectForKey:@"Article"];
-    NSLog(@"ArticleDic = %@",ArticleDic);
+    //地区
+    NSDictionary *AreaDic= [resultDictionary objectForKey:@"Area"];
+    NSLog(@"AreaDic = %@",AreaDic);
+    //行业
+    NSDictionary *TradeDic= [resultDictionary objectForKey:@"Trade"];
+    NSLog(@"TradeDic = %@",TradeDic);
+    
+    //工作
+    NSDictionary *JobDic= [resultDictionary objectForKey:@"Job"];
+    NSLog(@"JobDic = %@",JobDic);
     
     
     self.view.backgroundColor = [UIColor whiteColor];
@@ -136,14 +177,15 @@
         if ([code isEqualToString:@"0"]) {
             NSDictionary *dic1 = [responseObject objectForKey:@"data"];
             _DataArray = dic1;
-            NSString *userImageUrl = [_DataArray objectForKey:@"headpic"];
-            [userImageView setImageURLStr:userImageUrl placeholder:nil];
+            NSString *userImageUrl = [NSString stringWithFormat:@"%@",[ _DataArray objectForKey:@"headpic"]];
+            [userImageView setImageURLStr:userImageUrl placeholder:[UIImage imageNamed:@"touxiang2222@2x"]];
+            NSString *userName = [NSString stringWithFormat:@"%@",[_DataArray objectForKey:@"realname"]];
+            userName = [userName stringByRemovingPercentEncoding];
+            NSMutableArray*  arr1= [NSMutableArray arrayWithObjects:userName,[NSString stringWithFormat:@"%@",[_DataArray objectForKey:@"sex"]],[NSString stringWithFormat:@"%@",[_DataArray objectForKey:@"area"]], nil];
             
-            NSMutableArray*  arr1= [NSMutableArray arrayWithObjects:[_DataArray objectForKey:@"realname"],[NSString stringWithFormat:@"%@",[_DataArray objectForKey:@"sex"]],[NSString stringWithFormat:@"%@",[_DataArray objectForKey:@"area"]], nil];
+            NSMutableArray *arr3 = [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%@",[ _DataArray objectForKey:@"company_name"]],[NSString stringWithFormat:@"%@",[ _DataArray objectForKey:@"job"]] ,[NSString stringWithFormat:@"%@", [_DataArray objectForKey:@"trade"]],nil];
             
-            NSMutableArray *arr3 = [NSMutableArray arrayWithObjects:[_DataArray objectForKey:@"company_name"],[_DataArray objectForKey:@"job"] ,[_DataArray objectForKey:@"trade"],nil];
-            
-            NSMutableArray *arr2= [NSMutableArray arrayWithObjects:[_DataArray objectForKey:@"username"],[_DataArray objectForKey:@"mobile"],[_DataArray objectForKey:@"email"],nil];
+            NSMutableArray *arr2= [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%@",[ _DataArray objectForKey:@"username"]],[NSString stringWithFormat:@"%@",[ _DataArray objectForKey:@"mobile"]],[NSString stringWithFormat:@"%@",[ _DataArray objectForKey:@"email"]],nil];
             [_mainArray removeAllObjects];
             _mainArray = [NSMutableArray arrayWithObjects:arr1,arr2, arr3,nil];
             NSLog(@"_mainArray = %@",_mainArray);
@@ -165,32 +207,143 @@
 
     
     [self getPickerData];
+    [self initData];
+    
+    
+}
+- (void)initData{
+    //初始化数据，判断给出的Key对应的数据是否存在
+    if ([[WBBooksManager sharedInstance] isBookExistsForKey:@"Area"]) {
+        //存在，则读取
+        NSMutableDictionary * resultDictionary = [[NSMutableDictionary alloc] init];
+        [[WBBooksManager sharedInstance] readPlist:&resultDictionary];
+        NSDictionary *AreaDic = [resultDictionary objectForKey:@"Area"];
+        NSLog(@"Area = %@",AreaDic);
+        
+    }else{//不存在，则写入
+        
+       NSString *urlStr = [NSString stringWithFormat:@"%@gen/dict?name=province&access-token=%@",ApiUrlHead,_token];
+        NSLog(@"_token = %@",_token);
+        manager = [AFHTTPRequestOperationManager manager];
+        [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSLog(@"JSON: %@", responseObject);
+            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+            if ([code isEqualToString:@"0"]) {
+                NSDictionary*areaDiction=[[NSDictionary alloc]init];
+                _areaDiction = responseObject[@"data"][@"province"];
+
+            }else if (![code isEqualToString:@"0"]){
+                
+                
+            }
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error: %@", error);
+            
+            
+        }];
+        
+        [[WBBooksManager sharedInstance] writePlist: _areaDiction forKey:@"Area"];
+      
+    }
+    
+    //行业
+    //初始化数据，判断给出的Key对应的数据是否存在
+    if ([[WBBooksManager sharedInstance] isBookExistsForKey:@"Trade"]) {
+        //存在，则读取
+        NSMutableDictionary * resultDictionary = [[NSMutableDictionary alloc] init];
+        [[WBBooksManager sharedInstance] readPlist:&resultDictionary];
+        NSDictionary *TradeDic = [resultDictionary objectForKey:@"Trade"];
+        NSLog(@"Trade = %@",TradeDic);
+        
+    }else{//不存在，则写入
+        
+        NSString *urlStr = [NSString stringWithFormat:@"%@gen/dict?name=ptrade&access-token=%@",ApiUrlHead,_token];
+        NSLog(@"_token = %@",_token);
+        manager = [AFHTTPRequestOperationManager manager];
+        [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSLog(@"JSON: %@", responseObject);
+            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+            if ([code isEqualToString:@"0"]) {
+            _TradeDiction = responseObject[@"data"][@"ptrade"];
+                NSLog(@"_TradeDiction = %@",_TradeDiction);
+                
+            }else if (![code isEqualToString:@"0"]){
+                
+                
+            }
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error: %@", error);
+            
+            
+        }];
+        
+        [[WBBooksManager sharedInstance] writePlist: _TradeDiction forKey:@"Trade"];
+        
+    }
+    
+    //工作
+    //初始化数据，判断给出的Key对应的数据是否存在
+    if ([[WBBooksManager sharedInstance] isBookExistsForKey:@"Job"]) {
+        //存在，则读取
+        NSMutableDictionary * resultDictionary = [[NSMutableDictionary alloc] init];
+        [[WBBooksManager sharedInstance] readPlist:&resultDictionary];
+        NSDictionary *JobDic = [resultDictionary objectForKey:@"Job"];
+        //NSLog(@"JobDic = %@",JobDic);
+        
+    }else{//不存在，则写入
+        
+        NSString *urlStr = [NSString stringWithFormat:@"%@gen/dict?name=job&access-token=%@",ApiUrlHead,_token];
+        NSLog(@"_token = %@",_token);
+        manager = [AFHTTPRequestOperationManager manager];
+        [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            //NSLog(@"JSON: %@", responseObject);
+            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+            if ([code isEqualToString:@"0"]) {
+            _JobDiction = responseObject[@"data"][@"job"];
+                
+            }else if (![code isEqualToString:@"0"]){
+                
+                
+            }
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error: %@", error);
+            
+            
+        }];
+        
+        [[WBBooksManager sharedInstance] writePlist: _JobDiction forKey:@"Job"];
+        
+    }
+
+
+    
     
     
 }
 
+
 //读取pickview的数据
 - (void)getPickerData{
 //地区
-    NSString *urlStr = [NSString stringWithFormat:@"%@gen/dict?name=province&access-token=%@",ApiUrlHead,_token];
+    NSString *urlStr = [NSString stringWithFormat:@"%@gen/dict?name=province2&access-token=%@",ApiUrlHead,_token];
     NSLog(@"_token = %@",_token);
     manager = [AFHTTPRequestOperationManager manager];
     [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        
-        NSLog(@"JSON: %@", responseObject);
+        NSLog(@"=============================================================================================================================JSON: %@", responseObject);
         NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
         if ([code isEqualToString:@"0"]) {
-            _dic = responseObject[@"data"][@"province"];
-            NSArray * array = [_dic allKeys];
-            for (id num in array) {
-                [_proArr addObject:_dic[num]];
-            }
+            _provincedic = responseObject[@"data"][@"province2"];
+            NSLog(@"zzzzzzzzzzz_provincedic===========================================%@",_provincedic);
             //[_myPickerView show];
             //[_myTableView reloadData];
         }else if (![code isEqualToString:@"0"]){
             
             
         }
+
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Error: %@", error);
         
@@ -198,47 +351,44 @@
     }];
     
     
-    //职务
-    NSString *urlStr2 = [NSString stringWithFormat:@"%@gen/dict?name=job&access-token=%@",ApiUrlHead,_token];
-    NSLog(@"_token = %@",_token);
-    manager = [AFHTTPRequestOperationManager manager];
-    [manager GET:urlStr2 parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        
-        NSLog(@"JSON: %@", responseObject);
-        NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
-        if ([code isEqualToString:@"0"]) {
-            _dic2 = responseObject[@"data"][@"job"];
-            NSArray * array = [_dic2 allKeys];
-            for (id num in array) {
-                [_jobArr addObject:_dic2[num]];
-            }
-            //[_myPickerView show];
-            //[_myTableView reloadData];
-        }else if (![code isEqualToString:@"0"]){
-            
-            
-        }
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"Error: %@", error);
-        
-        
-    }];
+//    //职务
+//    NSString *urlStr2 = [NSString stringWithFormat:@"%@gen/dict?name=job&access-token=%@",ApiUrlHead,_token];
+//    NSLog(@"_token = %@",_token);
+//    manager = [AFHTTPRequestOperationManager manager];
+//    [manager GET:urlStr2 parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//        
+//        //NSLog(@"JSON: %@", responseObject);
+//        NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+//        if ([code isEqualToString:@"0"]) {
+//            _dic2 = responseObject[@"data"][@"job"];
+//            NSArray * array = [_dic2 allKeys];
+//            for (id num in array) {
+//                [_jobArr addObject:_dic2[num]];
+//            }
+//            //[_myPickerView show];
+//            //[_myTableView reloadData];
+//        }else if (![code isEqualToString:@"0"]){
+//            
+//            
+//        }
+//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//        NSLog(@"Error: %@", error);
+//        
+//        
+//    }];
     
     
     //行业
-    NSString *urlStr3 = [NSString stringWithFormat:@"%@gen/dict?name=trade&access-token=%@",ApiUrlHead,_token];
+    NSString *urlStr3 = [NSString stringWithFormat:@"%@gen/dict?name=ptrade&access-token=%@",ApiUrlHead,_token];
     NSLog(@"_token = %@",_token);
     manager = [AFHTTPRequestOperationManager manager];
     [manager GET:urlStr3 parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
-        NSLog(@"JSON: %@", responseObject);
+        //NSLog(@"JSON: %@", responseObject);
         NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
         if ([code isEqualToString:@"0"]) {
-            _dic3 = responseObject[@"data"][@"trade"];
-            NSArray * array = [_dic3 allKeys];
-            for (id num in array) {
-                [_tradeArr addObject:_dic3[num]];
-            }
+            _arrayTrade3 = responseObject[@"data"][@"ptrade"];
+            
             //[_myPickerView show];
             //[_myTableView reloadData];
         }else if (![code isEqualToString:@"0"]){
@@ -258,133 +408,134 @@
 }
 #pragma mark - ZHDelegate
 
-- (void)toobarDonBtnHaveClick:(ZHPickView *)pickView resultString:(NSString *)resultString{
-    NSLog(@"resultString%@",resultString);
-  
-    _mainArray[_section][_row]=resultString;
-    
-    NSLog(@"_dic.count%ld",_dic.count);
-    NSArray*arr=[_dic allKeys];
-    for (id num in arr) {
-        if ([_dic[num] isEqualToString:resultString]) {
-            
-            NSLog(@"num=%@",num);
-      
+-(void)toobarDonBtnHaveClick:(ZHPickView *)pickView resultID:(NSString *)resultID resultString:(NSString *)resultString{
+    NSLog(@"resultString = %@/  resultID = %@",resultString,resultID);
+    _mainArray[_section][_row] = resultString;
+
+    //上传地区的ID
+    NSString* URLStr = [NSString stringWithFormat:@"%@profile/chg-item?k=area_id&v=%@&access-token=%@",ApiUrlHead,resultID, _token];
+    NSLog(@"URLStr = %@",URLStr);
+    manager = [AFHTTPRequestOperationManager manager];
+    [manager GET:URLStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
-    //上传地区的ID；
-   
-   NSString* URLStr = [NSString stringWithFormat:@"%@profile/chg-item?k=area_id&v=%@&access-token=%@",ApiUrlHead,num, _token];
-            NSLog(@"_token = %@",_token);
-            manager = [AFHTTPRequestOperationManager manager];
-            [manager GET:URLStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                
-                NSLog(@"JSON: %@", responseObject);
-                NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
-                if ([code isEqualToString:@"0"]) {
-                //responseObject[@"data"][@"area"];
-                   // NSLog(@"-----------%@",responseObject[@"data"][@"area"]);
-                    
-                    [_tableview reloadData];
-                }else if (![code isEqualToString:@"0"]){
-                    NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
-                    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
-                    [alert show];
-                    
-                }
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                NSLog(@"Error: %@", error);
-                
-                
-            }];
+        NSLog(@"JSON: %@", responseObject);
+        NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+        if ([code isEqualToString:@"0"]) {
             
-        }}
-            
-        //上传职务ID
-            
-                    
-            
-    NSArray*arr1=[_dic2 allKeys];
-    for (id num2 in arr1) {
-    if ([_dic2[num2] isEqualToString:resultString]) {
-            NSLog(@"num=%@",num2);
-            NSString* URLStr2 = [NSString stringWithFormat:@"%@profile/chg-item?k=job_id&v=%@&access-token=%@",ApiUrlHead,num2, _token];
-            NSLog(@"_token = %@",_token);
-            manager = [AFHTTPRequestOperationManager manager];
-            [manager GET:URLStr2 parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                
-                NSLog(@"JSON: %@", responseObject);
-                NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
-                if ([code isEqualToString:@"0"]) {
-                    //responseObject[@"data"][@"area"];
-                    // NSLog(@"-----------%@",responseObject[@"data"][@"area"]);
-                    
-                    [_tableview reloadData];
-                }else if (![code isEqualToString:@"0"]){
-                    NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
-                    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
-                    [alert show];
-                    
-                }
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                NSLog(@"Error: %@", error);
-                
-                
-            }];
-            
-    }}
-    
-            //上传行业ID
-            
-            NSArray*arr2=[_dic3 allKeys];
-            
-            for (id num3 in arr2) {
-            if ([_dic3[num3] isEqualToString:resultString]) {
-                    NSLog(@"num=%@",num3);
-            NSString* URLStr3 = [NSString stringWithFormat:@"%@profile/chg-item?k=trade_id&v=%@&access-token=%@",ApiUrlHead,num3, _token];
-            NSLog(@"_token = %@",_token);
-            manager = [AFHTTPRequestOperationManager manager];
-            [manager GET:URLStr3 parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                
-                NSLog(@"JSON: %@", responseObject);
-                NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
-                if ([code isEqualToString:@"0"]) {
-                    //responseObject[@"data"][@"area"];
-                    // NSLog(@"-----------%@",responseObject[@"data"][@"area"]);
-                    
-                    [_tableview reloadData];
-                }else if (![code isEqualToString:@"0"]){
-                    NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
-                    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
-                    [alert show];
-                    
-                }
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                NSLog(@"Error: %@", error);
-                
-                
-            }];
-            
+            [_tableview reloadData];
+        }else if (![code isEqualToString:@"0"]){
+            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
+            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
+            [alert show];
             
         }
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error: %@", error);
+        
+        
+    }];
 
+    //else if (pickView.tag == 02){
+//        //上传地区的ID
+//        NSString* URLStr = [NSString stringWithFormat:@"%@profile/chg-item?k=area_id&v=%@&access-token=%@",ApiUrlHead,resultID, _token];
+//        NSLog(@"URLStr = %@",URLStr);
+//        manager = [AFHTTPRequestOperationManager manager];
+//        [manager GET:URLStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//            
+//            NSLog(@"JSON: %@", responseObject);
+//            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+//            if ([code isEqualToString:@"0"]) {
+//                
+//                [_tableview reloadData];
+//            }else if (![code isEqualToString:@"0"]){
+//                NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
+//                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
+//                [alert show];
+//                
+//            }
+//        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//            NSLog(@"Error: %@", error);
+//            
+//            
+//        }];
+        
     
+   // }
+   
     
-    }
     
     
     [_tableview reloadData];
     
 
 }
-    
 
+-(void)toobarDonBtnHaveClick:(ZHPickView *)pickView resultID22:(NSString *)resultID22 resultString22:(NSString *)resultString22{
+
+   _mainArray[_section][_row] = resultString22;
+    
+    //上传行业的ID；
+    if (pickView.tag == 22) {
+        NSString* URLStr3 = [NSString stringWithFormat:@"%@profile/chg-item?k=trade_id&v=%@&access-token=%@",ApiUrlHead,resultID22, _token];
+        NSLog(@"URLStr3 = %@",URLStr3);
+        //NSDictionary * _trade = @{@"k":@"trade_id",
+        //                                       @"v":resultID,
+        //                                       };
+        manager = [AFHTTPRequestOperationManager manager];
+        [manager GET:URLStr3 parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            NSLog(@"JSON: %@", responseObject);
+            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+            if ([code isEqualToString:@"0"]) {
+                
+                [_tableview reloadData];
+            }else if (![code isEqualToString:@"0"]){
+                NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
+                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
+                [alert show];
+                
+            }
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error: %@", error);
+            
+            
+        }];
+
+//    NSString* URLStr3 = [NSString stringWithFormat:@"%@profile/chg-item?k=trade_id&v=%@&access-token=%@",ApiUrlHead,resultID, _token];
+//    NSLog(@"URLStr3 = %@",URLStr3);
+//    //NSDictionary * _trade = @{@"k":@"trade_id",
+//    //                                       @"v":resultID,
+//    //                                       };
+//    manager = [AFHTTPRequestOperationManager manager];
+//    [manager GET:URLStr3 parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//        NSLog(@"JSON: %@", responseObject);
+//        NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+//        if ([code isEqualToString:@"0"]) {
+//            
+//            [_tableview reloadData];
+//        }else if (![code isEqualToString:@"0"]){
+//            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
+//            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
+//            [alert show];
+//            
+//        }
+//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//        NSLog(@"Error: %@", error);
+//        
+//        
+//    }];
+//}else if (pickView.tag == 02){
+     
+    }
+    [_tableview reloadData];
+
+}
 - (void)addTableviewHead{
     UIView *headview = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 84)];
   
     UIView *backgroundview = [[UIView alloc]initWithFrame:CGRectMake((self.view.bounds.size.width - 62)*0.5, (headview.bounds.size.height - 62)*0.5, 62, 62)];
     [headview addSubview:backgroundview];
     userImageView = [[UIImageView alloc]initWithFrame:backgroundview.bounds];
-   
+    userImageView.image = [UIImage imageNamed:@"touxiang2222@2x"];
     userImageView.backgroundColor = [UIColor whiteColor];
     userImageView.layer.masksToBounds = YES;
     userImageView.layer.cornerRadius = 4;
@@ -474,12 +625,16 @@
         return nil;
     }
 }
-- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForHeaderInSection:(NSInteger)section{
+
+//这一句解决点击头像进入这个页面会蹦
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
     if (section != 0) {
         return 30;
     }else{
         return 0;
     }
+
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     static NSString *cellIdentifier1 = @"statusCell3";
@@ -513,13 +668,18 @@
                 
                 [cell.contentView addSubview:mySegmentedControl1];
                 [mySegmentedControl1 addTarget:self action:@selector(Change:) forControlEvents:UIControlEventValueChanged];
-           }
+                
+                
+                
+            }
         }else{
             NSArray *subViewArr = cell.contentView.subviews;
             for (UIView *view in subViewArr) {
                 [view removeFromSuperview];
             }
             if (indexPath.section == 0&&indexPath.row == 1) {
+                
+                
                 
                 UISegmentedControl *mySegmentedControl1 =[[UISegmentedControl alloc]initWithItems:[NSArray arrayWithObjects:@"女",@"男", nil]];
                 mySegmentedControl1.frame = CGRectMake(self.view.bounds.size.width - 90, 5, 80, 20);
@@ -559,9 +719,25 @@
         }
         cell.textLabel.text = [[_titleArray objectAtIndex:indexPath.section]objectAtIndex:indexPath.row];
         cell.detailTextLabel.text = [NSString stringWithFormat:@"%@",[[_mainArray objectAtIndex:indexPath.section]objectAtIndex:indexPath.row]];
-        
+        if (indexPath.section==1&&indexPath.row==0) {
+            if ([cell.detailTextLabel.text isEqualToString:@"<null>"]||[cell.detailTextLabel.text isEqualToString:@""]) {
+                cell.detailTextLabel.text=@"设置账号";
+            }
+          
+        }
+           
         if (indexPath.section == 0&&indexPath.row == 1) {
             cell.detailTextLabel.text = @"";
+        }
+        if (indexPath.section==1&&indexPath.row==2) {
+            if ([cell.detailTextLabel.text isEqualToString:@"<null>"]||[cell.detailTextLabel.text isEqualToString:@""]) {
+                cell.detailTextLabel.text=@"绑定邮箱";
+            }
+        }
+        if (indexPath.section==1&&indexPath.row==1) {
+            if ([cell.detailTextLabel.text isEqualToString:@"<null>"]||[cell.detailTextLabel.text isEqualToString:@""]) {
+                cell.detailTextLabel.text=@"绑定手机";
+            }
         }
         
         return cell;
@@ -622,12 +798,13 @@
             _stAlertView.message = result;
             _mainArray[indexPath.section][indexPath.row]=result;
             
-            URLStr = [NSString stringWithFormat:@"%@profile/chg-item?k=realname&v=%@&access-token=%@",ApiUrlHead,_stAlertView.message, _token];
+            URLStr = [NSString stringWithFormat:@"%@profile/chg-item?access-token=%@",ApiUrlHead, _token];
                 NSLog(@"_token = %@",_token);
-                NSLog(@"_stAlertView.message=%@",_stAlertView.message);
-          
+               // NSLog(@"_stAlertView.message=%@",_stAlertView.message);
+            NSString *emoji = [_stAlertView.message stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            NSDictionary * _realname = @{@"k":@"realname",@"v":emoji,};
            manager = [AFHTTPRequestOperationManager manager];
-           [manager GET:URLStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+           [manager POST:URLStr parameters:_realname success:^(AFHTTPRequestOperation *operation, id responseObject) {
                                                     
             NSLog(@"JSON: %@", responseObject);
             NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
@@ -668,9 +845,10 @@
         
         //_proArr = [@[@"地区1",@"地区2",@"地区3"] mutableCopy];
         
-        _myPickerView = [[ZHPickView alloc]initPickviewWithArray:_proArr isHaveNavControler:NO];
+        _myPickerView = [[ZHPickView alloc]initPickviewWithArray:_provincedic isHaveNavControler:NO];
         _myPickerView.delegate = self;
         [_myPickerView show];
+        _myPickerView.tag = 02;
         _section=indexPath.section;
         _row=indexPath.row;
         
@@ -680,45 +858,125 @@
     }else if (indexPath.section == 2 && indexPath.row == 1){
         //选择职务
         //_proArr = [@[@"职务1",@"职务2",@"职务3"] mutableCopy];
-        _myPickerView = [[ZHPickView alloc]initPickviewWithArray:_jobArr isHaveNavControler:NO];
-        _myPickerView.delegate = self;
-        [_myPickerView show];
-        _section=indexPath.section;
-        _row=indexPath.row;
+//        _myPickerView = [[ZHPickView alloc]initPickviewWithArray:_jobArr isHaveNavControler:NO];
+//        _myPickerView.delegate = self;
+//        [_myPickerView show];
+//        _section=indexPath.section;
+//        _row=indexPath.row;
+        
+        
+        
+        __block NSString *URLStr = [NSString string];
+        _stAlertView = [[STAlertView alloc] initWithTitle:@"职位"
+                                                  message:nil textFieldHint:@"请输入职位" textFieldValue:_mainArray[indexPath.section][indexPath.row] cancelButtonTitle:@"取消"  otherButtonTitles:@"确定"
+                                        cancelButtonBlock:^{
+                                            NSLog(@"取消!");
+                                        } otherButtonBlock:^(NSString * result){
+                                            NSLog(@"职位名称设置成功，名称为：%@", result);
+                                            _stAlertView.message = result;
+                                            //让公司名称刷新
+                                            _mainArray[indexPath.section][indexPath.row]=result;
+                                            
+                                            URLStr = [NSString stringWithFormat:@"%@profile/chg-item?access-token=%@",ApiUrlHead, _token];
+                                            NSLog(@"_token = %@",_token);
+                                            //NSLog(@"_stAlertView.message=%@",_stAlertView.message);
+                                            
+                                            NSDictionary * _job = @{@"k":@"job",@"v":_stAlertView.message,};
+                                            
+                                            manager = [AFHTTPRequestOperationManager manager];
+                                            [manager POST:URLStr parameters:_job success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                                                
+                                                NSLog(@"JSON: %@", responseObject);
+                                                NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+                                                if ([code isEqualToString:@"0"]) {
+                                                    
+                                                    
+                                                    [_tableview reloadData];
+                                                }else if (![code isEqualToString:@"0"]){
+                                                    NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"err"]];
+                                                    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"" message:code delegate:nil cancelButtonTitle: @"OK"otherButtonTitles: nil];
+                                                    [alert show];
+                                                    
+                                                }
+                                            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                                                NSLog(@"Error: %@", error);
+                                                
+                                                
+                                            }];
+                                            
+                                            [_tableview reloadData];
+                                            
+                                        }];
+        
+        
+    
+
+        
+        
+        
     }else if (indexPath.section == 2 && indexPath.row == 2){
         //选择行业
         //_proArr = [@[@"行业1",@"行业2",@"行业3"] mutableCopy];
-        _myPickerView = [[ZHPickView alloc]initPickviewWithArray:_tradeArr isHaveNavControler:NO];
-        _myPickerView.delegate = self;
-        [_myPickerView show];
+        //NSLog(@"_arrayTrade3 = %@",_arrayTrade3);
+        
+        _myPickerView22 = [[pickerView222 alloc]initPickviewWithArray:_arrayTrade3 isHaveNavControler:NO];
+        _myPickerView22.delegate = self;
+        _myPickerView22.tag = 22;
+        [_myPickerView22 show];
         _section=indexPath.section;
         _row=indexPath.row;
         
     }else if (indexPath.section==1&&indexPath.row==0){
         //账号
-        ZhanghaoBandingViewController*zhanghao=[[ZhanghaoBandingViewController alloc]init];
-        [self.navigationController pushViewController:zhanghao animated:YES];
+        if ([_mainArray[indexPath.section][indexPath.row] isEqualToString:@""]) {
+            ZhanghaoBandingViewController*zhanghao=[[ZhanghaoBandingViewController alloc]init];
+            [self.navigationController pushViewController:zhanghao animated:YES];
+        }
+       
        
         
     
     }else if (indexPath.section==1&&indexPath.row==1){
         //电话号码
-        PhoneBangdingViewController*phone=[[PhoneBangdingViewController alloc]init];
-        [self.navigationController pushViewController:phone animated:YES];
+        if ([_mainArray[indexPath.section][indexPath.row] isEqualToString:@""]) {
+            PhoneBangdingViewController*phone=[[PhoneBangdingViewController alloc]init];
+            [self.navigationController pushViewController:phone animated:YES];
+        }else{
+            NSString *mobile = [NSString stringWithFormat:@"%@",[[_mainArray objectAtIndex:indexPath.section]objectAtIndex:indexPath.row]];
+            PhoneViewController*p=[[PhoneViewController alloc]init];
+            p.phoneNum = [NSString stringWithFormat:@"%@",mobile];
+            NSLog(@"===================%@",p.phoneNum);
+   
+
+            [self.navigationController pushViewController:p animated:YES];
+        
+        }
+       
         
     }else if (indexPath.section==1&&indexPath.row==2){
         //邮箱
-        if ([_mainArray[indexPath.section][indexPath.row] isEqualToString:@""]) {
+        if ([_mainArray[indexPath.section][indexPath.row] isEqualToString:@""]||[_mainArray[indexPath.section][indexPath.row] isEqualToString:@"<null>"] ) {
+            
+            
             YouxiangBangdingViewController*youxiang=[[YouxiangBangdingViewController alloc]init];
+            youxiang.token=_token;
+            youxiang.uid=_uid;
+            
             [self.navigationController pushViewController:youxiang animated:YES];
         }else{
-            YouXiangViewController * youxiang = [[YouXiangViewController alloc]init];
-            [self.navigationController pushViewController:youxiang animated:YES];
+            
+            NSString*YX=[NSString stringWithFormat:@"%@",[[_mainArray objectAtIndex:indexPath.section]objectAtIndex:indexPath.row ]];
+            YouXiangViewController * youxiang11 = [[YouXiangViewController alloc]init];
+            
+            youxiang11.youxiangNum=YX;
+            NSLog(@"youxiang11.youxiangLable==================%@",youxiang11.youxiangLable);
+            
+            [self.navigationController pushViewController:youxiang11 animated:YES];
         }
         
         
 
-    }if (indexPath.section == 2&&indexPath.row == 0) {
+    }else if (indexPath.section == 2&&indexPath.row == 0) {
         
         __block NSString *URLStr = [NSString string];
         _stAlertView = [[STAlertView alloc] initWithTitle:@"公司名称"
@@ -731,12 +989,14 @@
                                             //让公司名称刷新
                                             _mainArray[indexPath.section][indexPath.row]=result;
                                             
-                                            URLStr = [NSString stringWithFormat:@"%@profile/chg-item?k=company_name&v=%@&access-token=%@",ApiUrlHead,_stAlertView.message, _token];
+                                    URLStr = [NSString stringWithFormat:@"%@profile/chg-item?access-token=%@",ApiUrlHead, _token];
                                             NSLog(@"_token = %@",_token);
-                                            NSLog(@"_stAlertView.message=%@",_stAlertView.message);
+                                            //NSLog(@"_stAlertView.message=%@",_stAlertView.message);
+                                            
+                                  NSDictionary * _companyname = @{@"k":@"company_name",@"v":_stAlertView.message,};
                                             
                                             manager = [AFHTTPRequestOperationManager manager];
-                                            [manager GET:URLStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                                            [manager POST:URLStr parameters:_companyname success:^(AFHTTPRequestOperation *operation, id responseObject) {
                                                 
                                                 NSLog(@"JSON: %@", responseObject);
                                                 NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];

@@ -15,7 +15,8 @@
         self.numberOfLines = lineNum;
         self.textColor = color;
         self.font = [UIFont systemFontOfSize:fontNum];
-        NSString *testString = text;
+        NSString *testString = [NSString stringWithFormat:@"%@",text];
+        // NSString *encoded = [testString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         NSMutableAttributedString * attributedString1 = [[NSMutableAttributedString alloc] initWithString:testString];
         NSMutableParagraphStyle * paragraphStyle1 = [[NSMutableParagraphStyle alloc] init];
         [paragraphStyle1 setLineSpacing:spaceNum];

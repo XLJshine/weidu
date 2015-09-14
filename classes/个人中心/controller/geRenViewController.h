@@ -9,8 +9,14 @@
 #import <UIKit/UIKit.h>
 
 @interface geRenViewController : UIViewController
+@property (weak, nonatomic) IBOutlet UIImageView *image;
+@property (weak, nonatomic) IBOutlet UILabel *name;
+@property (weak, nonatomic) IBOutlet UILabel *zhangHaoLable;
+@property (weak, nonatomic) IBOutlet UILabel *phoneLable;
+@property (weak, nonatomic) IBOutlet UILabel *QQlable;
 - (IBAction)dongTaiButton:(id)sender;
 @property (weak, nonatomic) IBOutlet UIImageView *userImage;
+//@property (weak, nonatomic) IBOutlet UIImageView *userImage;
 @property (weak, nonatomic) IBOutlet UIButton *fangKeButton;
 @property (weak, nonatomic) IBOutlet UIButton *xiaoXiButton;
 @property (weak, nonatomic) IBOutlet UIButton *pingLunButton;
@@ -21,4 +27,9 @@
 - (IBAction)xiaoXiButton:(id)sender;
 - (IBAction)pingLunButton:(id)sender;
 - (IBAction)sheZhiButton:(id)sender;
+
+@property (nonatomic ,strong)NSString  *token;
+@property (nonatomic ,strong)NSString *uid;
+
++ (id)shareInstanceWithToken:(NSString *)token uid:(NSString *)uid;
 @end

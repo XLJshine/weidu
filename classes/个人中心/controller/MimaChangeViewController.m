@@ -8,7 +8,7 @@
 
 #import "MimaChangeViewController.h"
 #import "MimaChangeTableViewCell.h"
-@interface MimaChangeViewController ()<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate>
+@interface MimaChangeViewController ()<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate,UITextFieldDelegate>
 @property (nonatomic ,strong)UITableView *tableview;
 @property (nonatomic ,strong)NSArray *titleArray;
 @property (nonatomic ,strong)NSMutableArray *detailArray;
@@ -19,6 +19,16 @@
     NSString *oldMima;
     NSString *newMima;
     NSString *newMimaAgain;
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"MimaChangeViewController"];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"MimaChangeViewController"];
+    
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -93,8 +103,13 @@
     [cell title:[_titleArray objectAtIndex:indexPath.row] backgroundimage:[_backgroundImageArray objectAtIndex:indexPath.row]];
     cell.textField.tag = indexPath.row;
     [cell.textField addTarget:self action:@selector(changed:) forControlEvents:UIControlEventEditingChanged];
+    cell.textField.delegate = self;
     
     return cell;
+}
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    [textField resignFirstResponder];
+    return YES;
 }
 - (void)changed:(UITextField *)textField{
     switch (textField.tag) {

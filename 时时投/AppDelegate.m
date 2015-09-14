@@ -19,13 +19,16 @@
 #import "geRenViewController.h"
 #import "MobClick.h"
 #import <SMS_SDK/SMS_SDK.h>
-#define UMENG_APPKEY @"55c9ad88e0f55a095d00285d"
+#import "WeiboSDK.h"
+#define UMENG_APPKEY @"55f144efe0f55ac4760020e9"
 
-@interface AppDelegate ()
+@interface AppDelegate ()<WeiboSDKDelegate>
 
 @end
 
-@implementation AppDelegate
+@implementation AppDelegate{
+    geRenViewController *lvc;
+}
 
 - (void)umengTrack {
     //[MobClick setCrashReportEnabled:NO]; // 如果不需要捕捉异常，注释掉此行
@@ -42,8 +45,8 @@
     //    1.6.8之前的初始化方法
     //    [MobClick setDelegate:self reportPolicy:REALTIME];  //建议使用新方法
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onlineConfigCallBack:) name:UMOnlineConfigDidFinishedNotification object:nil];
-    
-    /* Class cls = NSClassFromString(@"UMANUtil");
+    // －－ 添加测试设备
+    Class cls = NSClassFromString(@"UMANUtil");
     SEL deviceIDSelector = @selector(openUDIDString);
     NSString *deviceID = nil;
     if(cls && [cls respondsToSelector:deviceIDSelector]){
@@ -54,7 +57,7 @@
                                                          error:nil];
     
     NSLog(@"%@", [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]);
-    */
+    
 }
 
 - (void)onlineConfigCallBack:(NSNotification *)note {
@@ -69,32 +72,34 @@
     [WXApi registerApp:@"wxf87374d4d536653f" withDescription:@"weixin"];
     [ShareSDK registerApp:@"9d2fcc5bb72e"];//字符串api20为您的ShareSDK的AppKey
     //添加新浪微博应用 注册网址 http://open.weibo.com
-    [WeiboSDK registerApp:@"1684301330"];
-    [ShareSDK connectSinaWeiboWithAppKey:@"1684301330"
-                               appSecret:@"bb893231472b48a1e9bba64f371e958d"
-                             redirectUri:@"https://api.weibo.com/oauth2/default.html"];
+    [WeiboSDK registerApp:@"1272924837"];
+   
+   
+    [ShareSDK connectSinaWeiboWithAppKey:@"1272924837"
+                               appSecret:@"d79e9bd53659517fcee05e3c068b23e7"
+                             redirectUri:@"http://www.baidu.com"];
     //当使用新浪微博客户端分享的时候需要按照下面的方法来初始化新浪的平台
-    [ShareSDK  connectSinaWeiboWithAppKey:@"1684301330"
-                                appSecret:@"bb893231472b48a1e9bba64f371e958d"
-                              redirectUri:@"https://api.weibo.com/oauth2/default.html"
+    [ShareSDK  connectSinaWeiboWithAppKey:@"1272924837"
+                                appSecret:@"d79e9bd53659517fcee05e3c068b23e7"
+                              redirectUri:@"http://www.baidu.com"
                               weiboSDKCls:[WeiboSDK class]];
     
     //添加QQ空间应用  注册网址  http://connect.qq.com/intro/login/
-    [ShareSDK connectQZoneWithAppKey:@"1104599456"
-                           appSecret:@"2RXNeNdT4hsLOr2g"
+    [ShareSDK connectQZoneWithAppKey:@"1104831008"
+                           appSecret:@"xn5t4rCKIFYPJM8e"
                    qqApiInterfaceCls:[QQApiInterface class]
                      tencentOAuthCls:[TencentOAuth class]];
     
     //添加QQ应用  注册网址  http://open.qq.com/
-    [ShareSDK connectQQWithQZoneAppKey:@"1104599456"
+    [ShareSDK connectQQWithQZoneAppKey:@"1104831008"
                      qqApiInterfaceCls:[QQApiInterface class]
                        tencentOAuthCls:[TencentOAuth class]];
     
     //添加微信应用 注册网址 http://open.weixin.qq.com
     /*[ShareSDK connectWeChatWithAppId:@"wxf87374d4d536653f"
      wechatCls:[WXApi class]];*/
-    [ShareSDK connectWeChatWithAppId:@"wxf87374d4d536653f"
-                           appSecret:@"49161ed663cb05bf80400e43dfc7b146"
+    [ShareSDK connectWeChatWithAppId:@"wx66a51ebed2c0d1ea"
+                           appSecret:@"dd367c7c6e270bcd37411d56dd80511a"
                            wechatCls:[WXApi class]];
     [ShareSDK importWeChatClass:[WXApi class]];
 
@@ -117,11 +122,10 @@
     //shareSDK集成
     [self shareSDK_init];
     //集成短信验证码
-    [SMS_SDK registerApp:@"9a0f983fcfd1" withSecret:@"d2738a6540d3d36a4078b05cd4bf2226"];
-    
+    [SMS_SDK registerApp:@"99ddd8602fc8" withSecret:@"9a25e52659bc1b9e3f77dc4ca2b7b575"];
     
     MainViewController *mvc = [[MainViewController alloc]init];
-    geRenViewController *lvc = [[geRenViewController alloc]init];
+    lvc = [[geRenViewController alloc]init];
     _siderViewController = [[YRSideViewController alloc]init];
     _siderViewController.rootViewController = mvc;
     _siderViewController.leftViewController = lvc;
@@ -129,7 +133,20 @@
     _siderViewController.showBoundsShadow = true;
     self.window.rootViewController = _siderViewController;
     
+     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(tokenGet:) name:@"tokenGet" object:nil]; //监听获取token
+    
     return YES;
+}
+-  (void)tokenGet:(NSNotification *)notification{
+    NSDictionary *dic = notification.object;
+    NSLog(@"dic = %@",dic);
+    NSString *_token = [NSString stringWithFormat:@"%@",[dic objectForKey:@"token"]];
+    NSString *_uid = [NSString stringWithFormat:@"%@",[dic objectForKey:@"uid"]];
+    // _aid=[NSString stringWithFormat:@"%@",[_dic objectForKey:@""]];
+    lvc.token = _token;
+    lvc.uid = _uid;
+    NSLog(@"_token=%@  _uid=%@",_token,_uid);
+    
 }
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -189,6 +206,7 @@
  * 可能收到的处理结果有SendMessageToWXResp、SendAuthResp等。
  * @param resp具体的回应内容，是自动释放的
  */
+
 -(void)onResp:(BaseResp*)resp{
     if ([resp isKindOfClass:[SendAuthResp class]]) {
         SendAuthResp *aresp = (SendAuthResp *)resp;
@@ -204,4 +222,33 @@
     }
 }
 
+
+#pragma mark --微博回调代理
+- (void)didReceiveWeiboRequest:(WBBaseRequest *)request{
+    
+}
+- (void)didReceiveWeiboResponse:(WBBaseResponse *)response
+{
+    if ([response isKindOfClass:WBSendMessageToWeiboResponse.class])
+    {
+        NSString *title = NSLocalizedString(@"发送结果", nil);
+        NSString *message = [NSString stringWithFormat:@"%@: %d\n%@: %@\n%@: %@", NSLocalizedString(@"响应状态", nil), (int)response.statusCode, NSLocalizedString(@"响应UserInfo数据", nil), response.userInfo, NSLocalizedString(@"原请求UserInfo数据", nil),response.requestUserInfo];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
+                                                        message:message
+                                                       delegate:nil
+                                              cancelButtonTitle:NSLocalizedString(@"确定", nil)
+                                              otherButtonTitles:nil];
+        WBSendMessageToWeiboResponse* sendMessageToWeiboResponse = (WBSendMessageToWeiboResponse*)response;
+        NSString* accessToken = [sendMessageToWeiboResponse.authResponse accessToken];
+        if (accessToken)
+        {
+            self.wbtoken = accessToken;
+        }
+        NSString* userID = [sendMessageToWeiboResponse.authResponse userID];
+        if (userID) {
+            self.wbCurrentUserID = userID;
+        }
+        [alert show];
+    }
+}
 @end

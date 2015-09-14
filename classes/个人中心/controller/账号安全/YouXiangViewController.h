@@ -13,5 +13,8 @@
 @property (nonatomic ,strong)NSString *uid;
 @property (nonatomic ,strong)NSString *youxiangNum;
 @property (weak, nonatomic) IBOutlet UILabel *youxiangLable;
-- (IBAction)jiebangAction:(id)sender;
+
+@property (weak, nonatomic) IBOutlet UIButton *jiechuBangding;
+- (IBAction)jiechuBangding:(id)sender;
+- (IBAction)xiuGaiBangdIng:(id)sender;
 @end

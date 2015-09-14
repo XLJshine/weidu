@@ -28,30 +28,41 @@
         lable.backgroundColor = [UIColor clearColor];
         [headView addSubview:lable];
         
-        NSArray *imageArray = [NSArray arrayWithObjects:@"shareqqkongjian_1",@"shareqq.png_1",@"shareweixin_1",@"shareqqweibo_1",@"sharepengyouquan_1", nil];
-        NSArray *titleArray = [NSArray arrayWithObjects:@"QQ空间",@"QQ好友",@"微信好友",@"微博",@"朋友圈", nil];
+        NSArray *imageArray = [NSArray arrayWithObjects:@"shareweixin_1",@"sharepengyouquan_1",@"shareqq.png_1",@"shareqqkongjian_1",@"shareqqweibo_1", nil];
+        NSArray *titleArray = [NSArray arrayWithObjects:@"微信好友",@"微信朋友圈",@"QQ好友",@"QQ空间",@"微博", nil];
         for (int i = 0; i < 5; i ++) {
             int x = i%3;
             int y = i/3;
             if (i < 3) {
-                ShareButton * shareBtn = [[ShareButton alloc]initWithFrame:CGRectMake(self.bounds.size.width*0.333*x, 40 + 100*y, self.bounds.size.width * 0.333, 100) image:[UIImage imageNamed:[imageArray objectAtIndex:i]] title:[titleArray objectAtIndex:i]];
-                shareBtn.tag = i;
-                [shareBtn addTarget:self action:@selector(shareAction:) forControlEvents:UIControlEventTouchUpInside];
-                [self addSubview:shareBtn];
-            }else{
-                ShareButton * shareBtn = [[ShareButton alloc]initWithFrame:CGRectMake(self.bounds.size.width*0.333*x + 50, 40 + 100*y, self.bounds.size.width * 0.333, 100) image:[UIImage imageNamed:[imageArray objectAtIndex:i]] title:[titleArray objectAtIndex:i]];
-                shareBtn.tag = i;
-                [shareBtn addTarget:self action:@selector(shareAction:) forControlEvents:UIControlEventTouchUpInside];
-                [self addSubview:shareBtn];
-            
-            
-            }
-           
+                if (i < 2&&[WXApi isWXAppInstalled]) {
+                    ShareButton * shareBtn = [[ShareButton alloc]initWithFrame:CGRectMake(self.bounds.size.width*0.333*x, 40 + 100*y, self.bounds.size.width * 0.333, 100) image:[UIImage imageNamed:[imageArray objectAtIndex:i]] title:[titleArray objectAtIndex:i]];
+                    shareBtn.tag = i;
+                    [shareBtn addTarget:self action:@selector(shareAction:) forControlEvents:UIControlEventTouchUpInside];
+                    [self addSubview:shareBtn];
+                }else if(i == 2&&[QQApi isQQInstalled]){
+                    ShareButton * shareBtn = [[ShareButton alloc]initWithFrame:CGRectMake(self.bounds.size.width*0.333*x, 40 + 100*y, self.bounds.size.width * 0.333, 100) image:[UIImage imageNamed:[imageArray objectAtIndex:i]] title:[titleArray objectAtIndex:i]];
+                    shareBtn.tag = i;
+                    [shareBtn addTarget:self action:@selector(shareAction:) forControlEvents:UIControlEventTouchUpInside];
+                    [self addSubview:shareBtn];
                 
-            
+                
+                }
+            }else{
+                if (i == 3&&[QQApi isQQInstalled]) {
+                    ShareButton * shareBtn = [[ShareButton alloc]initWithFrame:CGRectMake(self.bounds.size.width*0.333*x + 50, 40 + 100*y, self.bounds.size.width * 0.333, 100) image:[UIImage imageNamed:[imageArray objectAtIndex:i]] title:[titleArray objectAtIndex:i]];
+                    shareBtn.tag = i;
+                    [shareBtn addTarget:self action:@selector(shareAction:) forControlEvents:UIControlEventTouchUpInside];
+                    [self addSubview:shareBtn];
+                    
+                    
+                }else if(i == 4){
+                    ShareButton * shareBtn = [[ShareButton alloc]initWithFrame:CGRectMake(self.bounds.size.width*0.333*x + 50, 40 + 100*y, self.bounds.size.width * 0.333, 100) image:[UIImage imageNamed:[imageArray objectAtIndex:i]] title:[titleArray objectAtIndex:i]];
+                    shareBtn.tag = i;
+                    [shareBtn addTarget:self action:@selector(shareAction:) forControlEvents:UIControlEventTouchUpInside];
+                    [self addSubview:shareBtn];
+                }
+            }
         }
-        
-        
         
         UIView *sepline1 = [[UIView alloc]initWithFrame:CGRectMake(8, 40, self.bounds.size.width - 16, 0.5)];
         sepline1.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1];

@@ -26,6 +26,18 @@
     NSString* _defaultCountryName;
     NSString* _VerifyCode;
 }
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"MailJiebangViewController"];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [MobClick endLogPageView:@"MailJiebangViewController"];
+    //通知刷新我的个人中心
+    [[NSNotificationCenter defaultCenter]postNotificationName:@"reloadMyInfo" object:nil userInfo:nil];
+    
+}
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil{
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         

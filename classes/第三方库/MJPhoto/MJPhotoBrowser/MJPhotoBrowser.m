@@ -180,7 +180,7 @@
 		}
 	}
     
-	[_visiblePhotoViews minusSet:_reusablePhotoViews];
+    [_visiblePhotoViews minusSet:_reusablePhotoViews];
     while (_reusablePhotoViews.count > 2) {
         [_reusablePhotoViews removeObject:[_reusablePhotoViews anyObject]];
     }

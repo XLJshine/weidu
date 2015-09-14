@@ -9,11 +9,13 @@
 #import <UIKit/UIKit.h>
 #import "YRSideViewController.h"
 #import "WXApi.h"
-#import "WeiboSDK.h"
+
 @class MainViewController;
-@interface AppDelegate : UIResponder <UIApplicationDelegate,WXApiDelegate,WeiboSDKDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,WXApiDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) NSString *wbtoken;
+@property (strong, nonatomic) NSString *wbCurrentUserID;
 
 @property (strong, nonatomic) MainViewController *viewController;
 @property(strong,nonatomic)YRSideViewController *siderViewController;

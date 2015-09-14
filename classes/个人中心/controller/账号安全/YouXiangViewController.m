@@ -8,6 +8,7 @@
 
 #import "YouXiangViewController.h"
 #import "MailJieBang_ViewController.h"
+#import "JieChuBangDingYXViewController.h"
 @interface YouXiangViewController ()
 
 @end
@@ -30,9 +31,17 @@
 - (void)backAction{
     [self.navigationController popViewControllerAnimated:YES];
 }
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"YouxiangViewController"];
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"YouxiangViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
-    _youxiangLable.text = [NSString stringWithFormat:@"邮箱:%@",_youxiangNum];
+    _youxiangLable.text = [NSString stringWithFormat:@"您当前邮箱:%@",_youxiangNum];
     
     
     // Do any additional setup after loading the view from its nib.
@@ -53,33 +62,20 @@
 }
 */
 
-- (IBAction)jiebangAction:(id)sender {
-    /*NSString *urlStr = [NSString stringWithFormat:@"%@account/bind-email-send-vcode?email=%@&vcode=%@&access-token=%@",ApiUrlHead,_YouXiangNumTextField.text,_yanzhenmaTextFeild.text,_token];
-    NSLog(@"urlStr = %@",urlStr);
-    AFHTTPRequestOperationManager * manager = [AFHTTPRequestOperationManager manager];
-    [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"JSON: %@", responseObject);
-        NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
-        if ([code isEqualToString:@"0"]) {
-            //NSDictionary * Data = [responseObject objectForKey:@"data"];
-            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:@"绑定成功" delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
-            [alert show];
-            
-        }else if (![code isEqualToString:@"0"]){
-            NSString *error = [responseObject objectForKey:@"err"];
-            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:error delegate:nil cancelButtonTitle:@"OK" otherButtonTitles: nil];
-            [alert show];
-        }
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"Error: %@", error);
-        
-        
-    }];*/
+- (IBAction)jiechuBangding:(id)sender {
+    JieChuBangDingYXViewController*JVC=[[JieChuBangDingYXViewController alloc]init];
+    JVC.token=_token;
+    JVC.uid=_uid;
+    JVC.youxiangNum =_youxiangNum;
+    NSLog(@"YOUXIANG.youxiangNum===============%@",JVC.youxiangNum);
+    [self.navigationController pushViewController:JVC animated:YES];
+    
+}
+
+- (IBAction)xiuGaiBangdIng:(id)sender {
     MailJieBang_ViewController *MVC = [[MailJieBang_ViewController alloc]init];
     MVC.token = _token;
     MVC.uid = _uid;
     [self.navigationController pushViewController:MVC animated:YES];
-    
-    
 }
 @end

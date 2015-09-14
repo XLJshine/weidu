@@ -10,20 +10,22 @@
 
 @implementation TimeXLJ
 /*处理返回应该显示的时间*/
-+ (NSString *) returnUploadTime:(NSString *)timeString1
++ (NSString *) returnUploadTime_no1970:(NSString *)timeString1
 {
     /***时间截*******/
-    float f = [timeString1 floatValue];
-    NSDate *confromTimesp = [NSDate dateWithTimeIntervalSince1970:f];
+    //float f = [timeString1 floatValue];
+    //NSDate *confromTimesp = [NSDate dateWithTimeIntervalSince1970:f];
+    //NSDate *confromTimesp = [NSDate dateWithTimeIntervalSince1970:f];
     //NSLog(@"1296035591  = %@",confromTimesp);
-    NSString *timestr = [NSString stringWithFormat:@"%@",confromTimesp];
+    //NSString *timestr = [NSString stringWithFormat:@"%@",confromTimesp];
     //Tue May 21 10:56:45 +0800 2013
-    NSString *timeStr = [timestr substringToIndex:19];
-    //NSLog(@"timeStr=%@",timeStr);
+    //NSLog(@"timeStr = %@",timestr);
+    //NSString *timeStr = [timestr substringToIndex:19];
+    
     /*****************/
     NSDateFormatter *date=[[NSDateFormatter alloc] init];
     [date setDateFormat:@"YY-MM-dd HH:mm:ss"];
-    NSDate *d=[date dateFromString:timeStr];
+    NSDate *d=[date dateFromString:timeString1];
     //NSLog(@"d == %@",d);
     NSTimeInterval late=[d timeIntervalSince1970]*1;
     //NSLog(@"late == %f",late);
@@ -93,6 +95,93 @@
         //NSLog(@"timeString == %@",timeString);
     }
    
+    return timeString;
+}
++ (NSString *) returnUploadTime:(NSString *)timeString1
+{
+    /***时间截*******/
+    float f = [timeString1 floatValue];
+    NSDate *confromTimesp = [NSDate dateWithTimeIntervalSince1970:f];
+    //NSDate *confromTimesp = [NSDate dateWithTimeIntervalSince1970:f];
+    //NSLog(@"1296035591  = %@",confromTimesp);
+    NSString *timestr = [NSString stringWithFormat:@"%@",confromTimesp];
+    //Tue May 21 10:56:45 +0800 2013
+    //NSLog(@"timeStr = %@",timestr);
+    NSString *timeStr = [timestr substringToIndex:19];
+    
+    /*****************/
+    NSDateFormatter *date=[[NSDateFormatter alloc] init];
+    [date setDateFormat:@"YY-MM-dd HH:mm:ss"];
+    NSDate *d=[date dateFromString:timeStr];
+    //NSLog(@"d == %@",d);
+    NSTimeInterval late=[d timeIntervalSince1970]*1;
+    //NSLog(@"late == %f",late);
+    
+    NSDate* dat = [NSDate dateWithTimeIntervalSinceNow:0];
+    NSTimeInterval now=[dat timeIntervalSince1970]*1;
+    NSString *timeString=@"";
+    
+    NSDateFormatter *dateformatterLate=[[NSDateFormatter alloc] init];
+    [dateformatterLate setDateFormat:@"dd"];
+    NSString *  timeStringLate = [NSString stringWithFormat:@"%@",[dateformatterLate stringFromDate:d]];  //过去的时间日期
+    NSDateFormatter *dateformatterNow=[[NSDateFormatter alloc] init];
+    [dateformatterNow setDateFormat:@"dd"];
+    NSString * timeStringNow = [NSString stringWithFormat:@"%@",[dateformatterNow stringFromDate:dat]];  //现在的时间日期
+    //NSLog(@"timeStringLate = %@",timeStringLate);
+    //NSLog(@"timeStringNow = %@",timeStringNow);
+    //NSInteger timeStringLateInt = [timeStringLate integerValue];  //过去日期转整型
+    //NSInteger timeStringNowInt = [timeStringNow integerValue];    //现在日期转整型
+    //NSLog(@"timeStringLateInt = %i",timeStringLateInt);
+    //NSLog(@"timeStringNowInt = %i",timeStringNowInt);
+    
+    NSTimeInterval cha=now-late;
+    //NSLog(@"cha == %f",cha);
+    if (cha/3600<1) {
+        timeString = [NSString stringWithFormat:@"%f", cha/60];
+        timeString = [timeString substringToIndex:timeString.length-7];
+        //timeString=[NSString stringWithFormat:@"%@分钟前", timeString];
+        NSInteger time = [timeString integerValue];
+        if (time<1){
+            timeString = [NSString stringWithFormat:@"刚刚"];
+        }else{
+            NSDateFormatter *dateformatter=[[NSDateFormatter alloc] init];
+            [dateformatter setDateFormat:@"HH:mm"];
+            timeString = [NSString stringWithFormat:@"今天 %@",[dateformatter stringFromDate:d]];
+        }
+    }else{
+        if ([timeStringLate isEqualToString:timeStringNow]) {
+            //        timeString = [NSString stringWithFormat:@"%f", cha/3600];
+            //        timeString = [timeString substringToIndex:timeString.length-7];
+            //        timeString=[NSString stringWithFormat:@"%@小时前", timeString];
+            NSDateFormatter *dateformatter=[[NSDateFormatter alloc] init];
+            [dateformatter setDateFormat:@"HH:mm"];
+            timeString = [NSString stringWithFormat:@"今天 %@",[dateformatter stringFromDate:d]];
+        }else{
+            NSDateFormatter *dateformatter=[[NSDateFormatter alloc] init];
+            [dateformatter setDateFormat:@"HH:mm"];
+            timeString = [NSString stringWithFormat:@"昨天 %@",[dateformatter stringFromDate:d]];
+            
+        }
+        
+    }
+    
+    if (cha/86400>1&&cha/(86400*2)<1) {
+        NSDateFormatter *dateformatter=[[NSDateFormatter alloc] init];
+        [dateformatter setDateFormat:@"HH:mm"];
+        timeString = [NSString stringWithFormat:@"昨天 %@",[dateformatter stringFromDate:d]];
+    }
+    if (cha/(86400*2)>1)
+    {
+        //        timeString = [NSString stringWithFormat:@"%f", cha/86400];
+        //        timeString = [timeString substringToIndex:timeString.length-7];
+        //        timeString=[NSString stringWithFormat:@"%@天前", timeString];
+        NSDateFormatter *dateformatter=[[NSDateFormatter alloc] init];
+        //[dateformatter setDateFormat:@"YY-MM-dd HH:mm:ss"];
+        [dateformatter setDateFormat:@"MM-dd"];
+        timeString = [NSString stringWithFormat:@"%@",[dateformatter stringFromDate:d]];
+        //NSLog(@"timeString == %@",timeString);
+    }
+    
     return timeString;
 }
 //s是否同一天

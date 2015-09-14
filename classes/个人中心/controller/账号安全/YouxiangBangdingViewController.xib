@@ -8,9 +8,15 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="YouxiangBangdingViewController">
             <connections>
                 <outlet property="YouXiangNumTextField" destination="mEM-Ti-ZSk" id="lLJ-im-lHF"/>
+                <outlet property="quedingBDbtn" destination="BzK-4M-cmY" id="H1p-MK-pMc"/>
+                <outlet property="rugouYouXiangLable" destination="2X0-aQ-gmY" id="SUy-hW-Wk6"/>
+                <outlet property="shezhiMimaText" destination="nZY-h7-4J4" id="qeb-bC-xUX"/>
+                <outlet property="shuruBeijIngTu" destination="5PB-EO-UGG" id="875-Tp-DhW"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
                 <outlet property="yanzhenmaTextFeild" destination="7aw-gs-eYp" id="DmA-cq-SD5"/>
                 <outlet property="youXiangHuoQuButton" destination="dJt-Mr-wvp" id="y5i-TW-9wo"/>
+                <outlet property="zaiCiShuruBeijingTu" destination="LfU-cn-MeA" id="Naj-di-r6J"/>
+                <outlet property="zaiCiShuruText" destination="9wL-on-Rn4" id="jmo-Ks-mCh"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
@@ -18,15 +24,8 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="如果您确定要绑定您的邮箱号码，我们将对您的邮箱号码进行绑定" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="2X0-aQ-gmY">
-                    <rect key="frame" x="10" y="99" width="300" height="44"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                    <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                    <nil key="highlightedColor"/>
-                </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="BzK-4M-cmY">
-                    <rect key="frame" x="10" y="176" width="300" height="40"/>
+                    <rect key="frame" x="10" y="265" width="300" height="40"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <state key="normal" title="确定绑定" backgroundImage="圆角矩形-4.png">
@@ -57,7 +56,7 @@
                         <action selector="youXiangHuoQuButton:" destination="-1" eventType="touchUpInside" id="5xb-tP-smE"/>
                     </connections>
                 </button>
-                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入四位验证码" minimumFontSize="17" id="7aw-gs-eYp">
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入五位验证码" minimumFontSize="17" id="7aw-gs-eYp">
                     <rect key="frame" x="42" y="59" width="194" height="30"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -73,6 +72,33 @@
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="zhuce6.png" id="5PB-EO-UGG">
+                    <rect key="frame" x="10" y="104" width="300" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="zhuce6.png" id="LfU-cn-MeA">
+                    <rect key="frame" x="10" y="153" width="300" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                </imageView>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请设置登录密码" minimumFontSize="17" id="nZY-h7-4J4">
+                    <rect key="frame" x="10" y="104" width="300" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                </textField>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请再次输入密码" minimumFontSize="17" id="9wL-on-Rn4">
+                    <rect key="frame" x="10" y="153" width="300" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                </textField>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="如果您确定要绑定您的邮箱号码，我们将对您的邮箱号码进行绑定" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="2X0-aQ-gmY">
+                    <rect key="frame" x="10" y="192" width="300" height="44"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                    <nil key="highlightedColor"/>
+                </label>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <point key="canvasLocation" x="416" y="333"/>

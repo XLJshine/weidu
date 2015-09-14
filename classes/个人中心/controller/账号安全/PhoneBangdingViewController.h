@@ -9,6 +9,12 @@
 #import <UIKit/UIKit.h>
 
 @interface PhoneBangdingViewController : UIViewController<UITextFieldDelegate>
+@property (weak, nonatomic) IBOutlet UITextField *shuRuMimaText;
+@property (weak, nonatomic) IBOutlet UIImageView *shuruBeiJIngTu;
+@property (weak, nonatomic) IBOutlet UITextField *zaiCiShuRuMIMAText;
+@property (weak, nonatomic) IBOutlet UIImageView *zaiCiShuRuBeijingTu;
+@property (weak, nonatomic) IBOutlet UILabel *ruguoBangDingLable;
+@property (weak, nonatomic) IBOutlet UIButton *bangDingButton;
 @property (weak, nonatomic) IBOutlet UITextField *PhoneNumTextFiled;
 @property (weak, nonatomic) IBOutlet UITextField *PhoneYanZhengMa;
 @property (weak, nonatomic) IBOutlet UIButton *PhoneHuoquButton;

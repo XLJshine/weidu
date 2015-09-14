@@ -34,6 +34,14 @@
 - (void)backAction{
     [self.navigationController popViewControllerAnimated:YES];
 }
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"MimaViewController"];
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"MimaViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     

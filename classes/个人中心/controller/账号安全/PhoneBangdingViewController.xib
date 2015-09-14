@@ -10,7 +10,13 @@
                 <outlet property="PhoneHuoquButton" destination="0nD-qB-GtT" id="PlQ-qV-oYP"/>
                 <outlet property="PhoneNumTextFiled" destination="qpS-Qk-3hK" id="myh-uA-W4k"/>
                 <outlet property="PhoneYanZhengMa" destination="LIr-wb-XKF" id="HQP-sS-7Gy"/>
+                <outlet property="bangDingButton" destination="EVt-cv-3JQ" id="J5A-gg-TDp"/>
+                <outlet property="ruguoBangDingLable" destination="5BX-sd-GwA" id="KjD-n3-GOn"/>
+                <outlet property="shuRuMimaText" destination="1qh-6G-TX2" id="0c5-JT-E2Y"/>
+                <outlet property="shuruBeiJIngTu" destination="ocg-Z5-Gwr" id="RHe-xK-JEP"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+                <outlet property="zaiCiShuRuBeijingTu" destination="ZwR-vS-6JL" id="ol3-c1-lYA"/>
+                <outlet property="zaiCiShuRuMIMAText" destination="IN6-u2-he1" id="9PQ-TP-O1t"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
@@ -19,14 +25,14 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="如果您确定要绑定您的手机号码，我们将对您的手机号码进行绑定" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="5BX-sd-GwA">
-                    <rect key="frame" x="10" y="99" width="300" height="44"/>
+                    <rect key="frame" x="10" y="195" width="300" height="44"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="EVt-cv-3JQ">
-                    <rect key="frame" x="10" y="176" width="300" height="40"/>
+                    <rect key="frame" x="10" y="264" width="300" height="40"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <state key="normal" title="确定绑定" backgroundImage="圆角矩形-4.png">
@@ -73,9 +79,29 @@
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits"/>
                 </textField>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="zhuce6.png" id="ocg-Z5-Gwr">
+                    <rect key="frame" x="10" y="104" width="300" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="zhuce6.png" id="ZwR-vS-6JL">
+                    <rect key="frame" x="10" y="151" width="300" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                </imageView>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请设置登录密码" minimumFontSize="17" id="1qh-6G-TX2">
+                    <rect key="frame" x="18" y="104" width="292" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                </textField>
+                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请再次输入密码" minimumFontSize="17" id="IN6-u2-he1">
+                    <rect key="frame" x="13" y="151" width="300" height="35"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                </textField>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-            <point key="canvasLocation" x="135" y="338"/>
+            <point key="canvasLocation" x="191" y="333"/>
         </view>
     </objects>
     <resources>

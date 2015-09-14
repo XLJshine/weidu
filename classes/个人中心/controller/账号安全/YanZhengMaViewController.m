@@ -35,6 +35,14 @@
 - (void)backAction{
     [self.navigationController popViewControllerAnimated:YES];
 }
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"YanZhengMaViewController"];
+}
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"YanZhengMaViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     _textview.delegate = self;

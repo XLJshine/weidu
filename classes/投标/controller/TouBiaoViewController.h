@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface TouBiaoViewController : UIViewController
-@property (nonatomic ,strong)NSString  *token;
+@property (nonatomic ,strong)__block NSString  *token;
 @property (nonatomic ,strong)NSString *uid;
 @property (nonatomic ,strong)UIControl *grayView;
 @property (nonatomic ,strong)NSString *ifModelNavigation;

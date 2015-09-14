@@ -13,7 +13,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         [self setTitleColor:[UIColor colorWithWhite:0.2275 alpha:1] forState:UIControlStateNormal];
-        self.titleLabel.font = [UIFont systemFontOfSize:12.0];
+        self.titleLabel.font = [UIFont systemFontOfSize:14.0];
         self.titleLabel.textAlignment = NSTextAlignmentCenter;
         [self setImage:[UIImage imageNamed:@"shaixuan1@2x"] forState:UIControlStateSelected];
         [self setImage:[UIImage imageNamed:@"shaixuan2@2x"] forState:UIControlStateNormal];
@@ -30,7 +30,7 @@
 }
 
 - (CGRect)titleRectForContentRect:(CGRect)contentRect{
-    CGFloat x = self.bounds.size.width*0.2;
+    CGFloat x = self.bounds.size.width*0.2 - 2;
     CGFloat y = 13;
     CGFloat w = self.bounds.size.width * 0.6;
     CGFloat h = 14;

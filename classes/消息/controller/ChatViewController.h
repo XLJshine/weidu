@@ -9,5 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface ChatViewController : UIViewController
-
+@property (nonatomic ,strong)NSString  *token;
+@property (nonatomic ,strong)NSString *uid;      //我的ID
+@property (nonatomic ,strong)NSString *user_id;  //他的ID
+@property (nonatomic ,strong)NSString *realname; //他的姓名
 @end

@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 
 @interface TimeXLJ : NSObject
++ (NSString *) returnUploadTime_no1970:(NSString *)timeString1;
+//1970
 + (NSString *) returnUploadTime:(NSString *)timeString1;
 //s是否同一天
 +(BOOL)isSameDay:(NSDate*)date1 date2:(NSDate*)date2;

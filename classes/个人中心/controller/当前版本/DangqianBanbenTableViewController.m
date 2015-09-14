@@ -15,7 +15,15 @@
 @implementation DangqianBanbenTableViewController{
     NSArray *titleArray;
 }
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"DangqianBanViewController"];
+}
 
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"DangqianBanViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"当前版本";
@@ -36,7 +44,7 @@
                   @"欢迎页",
                   @"功能介绍",
                   @"举报与投诉",
-                  @"帮助与反馈",nil];
+                  @"意见与反馈",nil];
     
     
     
@@ -112,6 +120,10 @@
 
 - (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.row==4) {
+        UIAlertView*a=[[UIAlertView alloc]initWithTitle:@"1" message:@"1" delegate:self cancelButtonTitle:@"1" otherButtonTitles:@"1", nil];
+        [a show];
+    }
 
 }
 /*

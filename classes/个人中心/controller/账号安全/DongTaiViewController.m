@@ -9,17 +9,21 @@
 #import "DongTaiViewController.h"
 #import "DongTaiTableViewCell.h"
 #import "DongTaiModel.h"
-
+static DongTaiViewController *instance;
 @interface DongTaiViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
+    __weak IBOutlet UIImageView *boliImgView;
     NSMutableArray * _dataArr;
     NSMutableArray * _heightArr;
 }
 @property (weak, nonatomic) IBOutlet UITableView *myTableView;
-
+@property (strong, nonatomic)__block NSMutableArray *DataArray;
+@property(strong,nonatomic)NSArray*KeysArr;
 @end
 
-@implementation DongTaiViewController
+@implementation DongTaiViewController{
+      AFHTTPRequestOperationManager *manager;
+}
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil{
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         
@@ -34,45 +38,111 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
++ (id)shareInstanceWithToken:(NSString *)token uid:(NSString *)uid
+{
+    if (instance == nil)
+    {
+        instance = [[[self class]alloc]init];
+    }
+    instance.token = token;
+    instance.uid = uid;
+    
+    return instance;
+}
 
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"DongTaiViewController"];
+}
 
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"DongTaiViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
+    _KeysArr=[[NSArray alloc]init];
     
-    
+    _myTableView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height-64);
     [_myTableView registerNib:[UINib nibWithNibName:@"DongTaiTableViewCell" bundle:nil] forCellReuseIdentifier:@"dongtaicell"];
     
-    [self createData];
+   
+    
+    NSString *urlStr = [NSString stringWithFormat:@"%@profile/action?access-token=%@",ApiUrlHead,_token];
+    NSLog(@"=============_token = %@",_token);
+    manager = [AFHTTPRequestOperationManager manager];
+    [manager GET:urlStr parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+       // NSLog(@"JSON: %@", responseObject);
+        NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+        UIImageView*showImage = [[UIImageView alloc]init];
+        if (self.view.bounds.size.height>500) {
+            //如果没有动态，就出现这个图片。
+            showImage.image = [UIImage imageNamed:@"我的动态5S@2X"];
+           
+            showImage.frame=self.view.frame;
+            [self.view addSubview:showImage];
+        }else{
+            //如果没有动态，就出现这个图片。
+            showImage.image = [UIImage imageNamed:@"我的动态"];
+            
+            showImage.frame=self.view.frame;
+            [self.view addSubview:showImage];
+        
+        
+        
+        }
+      
+       boliImgView.hidden = YES;
+
+        if ([code isEqualToString:@"0"]) {
+              _DataArray = [responseObject objectForKey:@"data"];
+            //showView.backgroundColor = [UIColor clearColor];
+            //showView.userInteractionEnabled = YES;
+            if (_DataArray.count > 0) {
+                [showImage removeFromSuperview];
+            }
+            [self createData];
+            
+            [_myTableView reloadData];
+        }else if (![code isEqualToString:@"0"]){
+            
+        }
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Error: %@", error);
+        
+        
+    }];
+    
+    
 }
 -(void)createData{
     _heightArr = [NSMutableArray array];
-    _dataArr = [NSMutableArray array];
-    NSArray * timeArr = @[@"刚刚",@"14:30",@"14:30"];
-    NSArray * xinxiArr = @[@"徐曦腕请求添加您为好友",@"你已经添加林淑芬为好友，你们现在可以进行通话",@"你分享了《甘肃烟草工业有限责任公司精品“兰州”烟卷专用生产线技术改造项目旧联台》到朋友圈"];
-    for (int i = 0; i<timeArr.count*4; i++) {
-        DongTaiModel * model = [[DongTaiModel alloc]init];
-        model.timeStr = timeArr[i%3];
-        model.xinxiStr = xinxiArr[i%3];
-        NSString * xinxi = xinxiArr[i%3];
-        
-        CGFloat height = [xinxi sizeWithFont:[UIFont systemFontOfSize:13] constrainedToSize:CGSizeMake(210, 1000)].height;
+
+    for (int i = 0; i<_DataArray.count; i++) {
+//        DongTaiModel * model = [[DongTaiModel alloc]init];
+//        model.timeStr = _DataArray[i][@"time"];
+//        model.xinxiStr = _DataArray[i][@"title"];
+        CGFloat height = [_DataArray[i][@"title"] sizeWithFont:[UIFont systemFontOfSize:13] constrainedToSize:CGSizeMake(210, 1000)].height;
         [_heightArr addObject:[NSNumber numberWithFloat:height]];
-        [_dataArr addObject:model];
+        //[_dataArr addObject:model];
     }
+    //NSLog(@"%ld",_heightArr.count);
     [self.myTableView reloadData];
 }
 #pragma mark- tableview
 
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return _dataArr.count;
+    return _DataArray.count;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     DongTaiTableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:@"dongtaicell"];
-    DongTaiModel * model = _dataArr[indexPath.row];
+//    DongTaiModel * model = _dataArr[indexPath.row];
     NSNumber * num = _heightArr[indexPath.row];
     
-    cell.timeLabel.text = model.timeStr;
+//    cell.timeLabel.text = model.timeStr;
+    
     NSArray * array = cell.subviews;
     for (UIView * test in array) {
         if ([test isKindOfClass:[UILabel class]] && test.frame.size.width > 200) {
@@ -86,51 +156,26 @@
     style.headIndent = 10;//缩进
     style.firstLineHeadIndent = 10;
     //style.lineSpacing = 10;//行距
-    NSMutableAttributedString * AString = [[NSMutableAttributedString  alloc]initWithString:model.xinxiStr];
+    NSMutableAttributedString * AString = [[NSMutableAttributedString  alloc]initWithString:_DataArray[indexPath.row][@"title"]];
     [AString addAttribute:NSParagraphStyleAttributeName value:style range:NSMakeRange(0, AString.length)];
     xinxiLabel.attributedText = AString;
-    xinxiLabel.font = [UIFont systemFontOfSize:11];
+    xinxiLabel.font = [UIFont systemFontOfSize:13];
     xinxiLabel.backgroundColor = [UIColor whiteColor];
+    //xinxiLabel.text=_DataArray[indexPath.row][@"title"];
     
-//    UILabel * xinxiLabel = [[UILabel alloc]initWithFrame:CGRectMake(83, 14, 222, [num floatValue])];
-//    xinxiLabel.numberOfLines = 0;
-//    xinxiLabel.text = model.xinxiStr;
-//    xinxiLabel.font = [UIFont systemFontOfSize:11];
-//    xinxiLabel.backgroundColor = [UIColor whiteColor];
     [cell addSubview:xinxiLabel];
-    
-//    cell.xinxiLable.frame = CGRectMake(8, 0, 210, 200);
-//    cell.xinxiLable.backgroundColor = [UIColor redColor];
-//    UIImageView * imageView = [[UIImageView alloc]initWithFrame:CGRectMake(78, 8, 228, [num floatValue]+10)];
-//    imageView.image = [UIImage imageNamed:@"圆角矩形-5@2x_1.png"];
-//    [cell addSubview:imageView];
-//    cell.model = model;
-//    cell.timeLabel.text = model.timeStr;
-//    _xinxiImageView.frame = CGRectMake(78,8,228, _model.xinxiImageViewHeight);
-
-    //cell.model = model;
-//    cell.timeLabel.text = model.timeStr;
-//    cell.xinxiLable.text = model.xinxiStr;
-//    CGFloat xinxiLableHeight = [model.xinxiStr sizeWithFont:[UIFont systemFontOfSize:13] constrainedToSize:CGSizeMake(210, MAXFLOAT)].height;
-//    cell.xinxiLable.frame = CGRectMake(89, 13, 210, xinxiLableHeight);
-//    CGRect rect = cell.frame;
-//    rect.size.height = xinxiLableHeight+20;
-//    cell.frame = rect;
+    NSString * str = _DataArray[indexPath.row][@"time"];
+    NSArray * timeArr = [str componentsSeparatedByString:@" "];
+    cell.timeLabel.text = [timeArr lastObject];
 
     return cell;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-        NSNumber * number = _heightArr[indexPath.row];
-        NSLog(@"[number floatValue]+20==%f",[number floatValue]+20);
-        return [number floatValue]+30;
-//    DongTaiModel * model = _dataArr[indexPath.row];
-//    //NSLog(@"model.xinxiImageViewHeight+20==%f",model.xinxiImageViewHeight+20);
-//    NSLog(@"model.xinxiImageViewHeight==%f",model.xinxiImageViewHeight);
-//    return model.xinxiImageViewHeight+200;
-//    UITableViewCell * cell = [self tableView:tableView cellForRowAtIndexPath:indexPath];
-//    return cell.frame.size.height;
-    
-    
+    //NSLog(@"_heightArr.COUNT = %lu",(unsigned long)_heightArr.count);
+    NSNumber * number = _heightArr[indexPath.row];
+    // NSLog(@"[number floatValue]+20==%f",[number floatValue]+20);
+    return [number floatValue]+30;
+    //return 30;
 }
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
     return 1;

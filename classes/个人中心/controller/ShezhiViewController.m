@@ -9,10 +9,12 @@
 #import "ShezhiViewController.h"
 #import "ShezhiTableViewCell.h"
 #import "ZhanghaoSafeViewController.h"
-#import "NewMessageViewController.h"
+
 #import "ShowWaysViewController.h"
 #import "WBBooksManager.h"
 #import "DangqianBanbenTableViewController.h"
+#import "DQBanBengViewController.h"
+static ShezhiViewController *instance;
 #define seplineColor  [UIColor colorWithWhite:0.8 alpha:1]
 @interface ShezhiViewController ()<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate>
 @property (nonatomic ,strong)UITableView *tableview;
@@ -23,6 +25,7 @@
 
 @implementation ShezhiViewController{
     NSString *tuiSong;    //判断是否开启推送0为关，1为开
+    AFHTTPRequestOperationManager *manager;
 }
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil{
     if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
@@ -38,11 +41,34 @@
     }
     return self;
 }
++ (id)shareInstanceWithToken:(NSString *)token uid:(NSString *)uid
+{
+    if (instance == nil)
+    {
+        instance = [[[self class]alloc]init];
+    }
+    instance.token = token;
+    instance.uid = uid;
+    
+    return instance;
+}
 - (void)backAction{
     [self dismissViewControllerAnimated:YES completion:nil];
 }
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"ShezhiViewController"];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"ShezhiViewController"];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
+    //网络
+    manager = [AFHTTPRequestOperationManager manager];
+    
     self.view.backgroundColor = [UIColor whiteColor];
     UIImageView *backgrondview = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"beijing@2x"]];
     [self.view addSubview:backgrondview];
@@ -75,15 +101,14 @@
     }
 }
 - (void)data{
-    _imageArray = [NSArray arrayWithObjects:[UIImage imageNamed:@"shezhi1@2x"],[UIImage imageNamed:@"shezhi1@3x"],[UIImage imageNamed:@"shezhi4@2x"],[UIImage imageNamed:@"shezhi6@2x"], nil];
+    _imageArray = [NSArray arrayWithObjects:[UIImage imageNamed:@"shezhi1@2x"],[UIImage imageNamed:@"shezhi4@2x"],[UIImage imageNamed:@"shezhi6@2x"], nil];
     
     _titleArray = [NSArray arrayWithObjects:@"账户安全",
                    
-                   @"新消息通知",
                    @"清理缓存",
                    
                    @"当前版本",nil];
-    _backgroundImageArray = [NSArray arrayWithObjects:[UIImage imageNamed:@"chaangtiao1@2x"],[UIImage imageNamed:@"chaangtiao2@2x"],[UIImage imageNamed:@"chaangtiao2@2x"],[UIImage imageNamed:@"chaangtiao3@2x"], nil];
+    _backgroundImageArray = [NSArray arrayWithObjects:[UIImage imageNamed:@"chaangtiao1@2x"],[UIImage imageNamed:@"chaangtiao2@2x"],[UIImage imageNamed:@"chaangtiao3@2x"], nil];
 }
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     //#warning Potentially incomplete method implementation.
@@ -94,7 +119,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     //#warning Incomplete method implementation.
     // Return the number of rows in the section.
-    return 4;
+    return 3;
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     return 50;
@@ -113,30 +138,41 @@
     cell.backgroundColor = [UIColor clearColor];
     cell.contentView.backgroundColor = [UIColor whiteColor];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    
-    if (indexPath.row == 0||indexPath.row == 1||indexPath.row == 2||indexPath.row == 3) {
-        UIImageView *arrawImage = [[UIImageView alloc]initWithFrame:CGRectMake(self.view.bounds.size.width - 42, 19, 12, 12)];
-        [arrawImage setImage:[UIImage imageNamed:@"fangRight@2x"]];
-        [cell.contentView addSubview:arrawImage];
-        
-    }else if(indexPath.row == 4){
-       
+//    
+//    if (indexPath.row == 0||indexPath.row == 2||indexPath.row == 3) {
+//        UIImageView *arrawImage = [[UIImageView alloc]initWithFrame:CGRectMake(self.view.bounds.size.width - 42, 19, 12, 12)];
+//        [arrawImage setImage:[UIImage imageNamed:@"fangRight@2x"]];
+//        [cell.contentView addSubview:arrawImage];
+//        
+//       
+//    }
+    //添加switch
+    /*if (indexPath.row == 1) {
         UISwitch *switchBtn = [[UISwitch alloc]initWithFrame:CGRectMake(self.view.bounds.size.width - 80, 10, 30, 10)];
         if ([tuiSong isEqualToString:@"1"]) {
             switchBtn.on = YES;
+            NSLog(@"11111");
         }else{
             switchBtn.on = NO;
+            NSLog(@"00000");
         }
         
         [switchBtn addTarget:self action:@selector(switchAction:) forControlEvents:UIControlEventTouchUpInside];
-        switchBtn.backgroundColor = [UIColor clearColor];
+       
         [cell.contentView addSubview:switchBtn];
-    
-    }
+    }*/
     
     return cell;
 }
+
+-(void)switchAction1:(UISwitch*)send{
+    
+   
+    
+
+}
 - (void)switchAction:(UISwitch *)sender{
+    NSLog(@"sender.on=========%i",sender.on);
     UISwitch *switchButton = (UISwitch*)sender;
     BOOL isButtonOn = [switchButton isOn];
     
@@ -150,15 +186,70 @@
         [userDic setValue:@"0" forKey:@"tuiSong"];
     }
     
-    //判断给出的Key对应的数据是否存在
-    if ([[WBBooksManager sharedInstance] isBookExistsForKey:@"shezhi"]) {
-        //存在，则替换之
-        NSLog(@"存在，则替换之");
-        [[WBBooksManager sharedInstance] replaceDictionary:userDic withDictionaryKey:@"shezhi"];
-    }else{//不存在，则写入
-        NSLog(@"不存在，则写入");
-        [[WBBooksManager sharedInstance] writePlist:userDic forKey:@"shezhi"];
+  
+    NSString*URl=[NSString stringWithFormat:@"%@account/save-setting?access-token=%@",ApiUrlHead,_token];
+    NSDictionary *_textDIC = [NSDictionary dictionary];
+    if (sender.on) {
+        _textDIC = @{@"push_msg": @"1"};
+        [manager POST:URl parameters:_textDIC success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            NSLog(@"JSON: %@", responseObject);
+            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+            if ([code isEqualToString:@"0"]) {
+                NSLog(@"消息发送成功");
+                //判断给出的Key对应的数据是否存在
+                if ([[WBBooksManager sharedInstance] isBookExistsForKey:@"shezhi"]) {
+                    //存在，则替换之
+                    NSLog(@"存在，则替换之");
+                    [[WBBooksManager sharedInstance] replaceDictionary:userDic withDictionaryKey:@"shezhi"];
+                }else{//不存在，则写入
+                    NSLog(@"不存在，则写入");
+                    [[WBBooksManager sharedInstance] writePlist:userDic forKey:@"shezhi"];
+                }
+                
+                
+            }else if (![code isEqualToString:@"0"]){
+                NSString *error = [responseObject objectForKey:@"err"];
+                NSLog(@"error=%@",error);
+                
+            }
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            NSLog(@"Error: %@", error);
+            
+            
+        }];
+        
+    }else{
+        _textDIC = @{@"push_msg": @"0"};
+        [manager POST:URl parameters: _textDIC success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            NSLog(@"JSON: %@", responseObject);
+            NSString *code = [NSString stringWithFormat:@"%@",[responseObject objectForKey:@"code"]];
+            if ([code isEqualToString:@"0"]) {
+                NSLog(@"消息发送成功");
+                //判断给出的Key对应的数据是否存在
+                if ([[WBBooksManager sharedInstance] isBookExistsForKey:@"shezhi"]) {
+                    //存在，则替换之
+                    NSLog(@"存在，则替换之");
+                    [[WBBooksManager sharedInstance] replaceDictionary:userDic withDictionaryKey:@"shezhi"];
+                }else{//不存在，则写入
+                    NSLog(@"不存在，则写入");
+                    [[WBBooksManager sharedInstance] writePlist:userDic forKey:@"shezhi"];
+                }
+                
+            }
+            else if (![code isEqualToString:@"0"]){
+                NSString *error = [responseObject objectForKey:@"err"];
+                NSLog(@"error=%@",error);
+                
+            }
+        }
+              failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                  NSLog(@"Error: %@", error);
+                  
+                  
+              }];
     }
+    
+
 }
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -168,15 +259,16 @@
         ZVC.uid = _uid;
         [self.navigationController pushViewController:ZVC animated:YES];
     }else if (indexPath.row == 1){
-        NewMessageViewController *Nvc = [[NewMessageViewController alloc]init];
-        [self.navigationController pushViewController:Nvc animated:YES];
-    }else if (indexPath.row == 2){
         //提示窗弹出
         UIAlertView *alert1 = [[UIAlertView alloc]initWithTitle:@"提示" message:@"是否确定清理缓存" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
         [alert1 show];
-    }else if (indexPath.row == 3){
-        DangqianBanbenTableViewController *DVC = [[DangqianBanbenTableViewController alloc]init];
-        [self.navigationController pushViewController:DVC animated:YES];
+    }else if (indexPath.row == 2){
+//        DangqianBanbenTableViewController *DVC = [[DangqianBanbenTableViewController alloc]init];
+//        [self.navigationController pushViewController:DVC animated:YES];
+        DQBanBengViewController*DQVC=[[DQBanBengViewController alloc]init];
+        DQVC.token = _token;
+        DQVC.uid = _uid;
+        [self.navigationController pushViewController:DQVC animated:YES];
         
     }else if (indexPath.row == 5){
         
